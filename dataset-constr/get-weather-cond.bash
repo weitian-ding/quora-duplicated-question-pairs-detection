@@ -1,8 +1,19 @@
-cd Goc_weather_data
-for year in `seq 2016 2016`
+#!/bin/bash
+
+root_dir=GoC_weather_data
+
+if [ $# -ne 5 ]; then
+    echo "Usuage: $0 [[station_id]] [[year_begin]] [[year_end]] [[month_begin]] [[month_end]]"
+    exit 1
+fi
+
+
+for year in `seq ${2} ${3}`
 do 
-	for month in `seq 1 12`
+	dir="${root_dir}/${1}/${year}"
+	mkdir -p $dir
+	for month in `seq ${4} ${5}`
 	do
-		wget --content-disposition "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${1}&Year=${year}&Month=${month}&Day=14&timeframe=1&submit=Download+Data" 
+		wget --content-disposition -O "${dir}/${month}.csv" "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${1}&Year=${year}&Month=${month}&Day=14&timeframe=1&submit=Download+Data" 
 	done
 done
