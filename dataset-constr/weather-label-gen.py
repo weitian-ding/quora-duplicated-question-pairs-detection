@@ -2,12 +2,14 @@
 import os
 from datetime import tzinfo, datetime
 from pytz import timezone
+import csv
 
 CSV_FILENAME = 'GoC_weather_data/48569/2017/1.csv'
 HEADER_OFFSET = 16
 WEATHER_TIMEZONE = 'US/Eastern'
 IMG_PATH = 'AMOS_Data/00017964/2017.01'
 WEATHER_DEFAULT = 'DNE'
+OUTPUT_FILENAME = 'labels.csv'
 
 # converts a timestamp to integers
 def utc_to_int(ts):
@@ -18,13 +20,12 @@ def utc_to_int(ts):
 def main():
     weather_table = {}
     # read the weather conditions
-    import csv
-    with open(CSV_FILENAME) as csvfile:
+    with open(CSV_FILENAME, 'r') as in_file:
         # skip the headers
         for _ in range(HEADER_OFFSET):
-            next(csvfile)
+            next(in_file)
 
-        reader = csv.DictReader(csvfile)
+        reader = csv.DictReader(in_file)
 
         for row in reader:
             ts = datetime.strptime(row['Date/Time'], '%Y-%m-%d %H:%M')
@@ -42,6 +43,11 @@ def main():
         weather = weather_table.get(img_id, WEATHER_DEFAULT)
         labels.append(weather)  # look up the weather condition
         print("{} => {}".format(img, weather))
+
+    # writes the labels to csv file
+    with open(OUTPUT_FILENAME, 'w') as out_file:
+        writer = csv.writer(out_file)
+        writer.writerow(labels)
 
 
 if __name__ == "__main__":
