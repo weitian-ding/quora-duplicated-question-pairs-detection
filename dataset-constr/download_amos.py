@@ -17,7 +17,7 @@ ROOT_LOCATION = None
 
 # change these parameters as necessary to download whichever camera or year or month you
 # want to download.
-CAMERAS_TO_DOWNLOAD = [17964]
+CAMERAS_TO_DOWNLOAD = [17965]
 YEARS_TO_DOWNLOAD = [2017]
 #MONTHS_TO_DOWNLOAD = range(1,13)
 MONTHS_TO_DOWNLOAD = [1]

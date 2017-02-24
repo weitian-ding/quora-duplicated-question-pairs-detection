@@ -4,10 +4,10 @@ from datetime import tzinfo, datetime
 from pytz import timezone
 import csv
 
-CSV_FILENAME = 'GoC_weather_data/48569/2017/1.csv'
+CSV_FILENAME = 'GoC_weather_data/7558/2017/1.csv'
 HEADER_OFFSET = 16
-WEATHER_TIMEZONE = 'US/Eastern'
-IMG_PATH = 'AMOS_Data/00017964/2017.01'
+WEATHER_TIMEZONE = 'Canada/Atlantic'
+IMG_PATH = 'AMOS_Data/00017965/2017.01'
 WEATHER_DEFAULT = 'DNE'
 OUTPUT_FILENAME = 'labels.csv'
 
