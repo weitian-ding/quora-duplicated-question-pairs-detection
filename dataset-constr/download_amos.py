@@ -18,9 +18,9 @@ ROOT_LOCATION = None
 # change these parameters as necessary to download whichever camera or year or month you
 # want to download.
 CAMERAS_TO_DOWNLOAD = [17965]
-YEARS_TO_DOWNLOAD = [2017]
+YEARS_TO_DOWNLOAD = [2016]
 #MONTHS_TO_DOWNLOAD = range(1,13)
-MONTHS_TO_DOWNLOAD = [1]
+MONTHS_TO_DOWNLOAD = range(1,12)
 # if the script crashed or the power went out or something, this flag will
 # skip downloading and unzipping a month's worth of images if there's already
 # a folder where it should be.  If you set this to false, then downloads
@@ -43,11 +43,12 @@ class DownloadThread(threading.Thread):
 		self.month = month
 
 	def run(self):
-		location = ROOT_LOCATION + '%08d/%04d.%02d/' % (self.camera_id, self.year, self.month)
+		location = ROOT_LOCATION + '%d/' % (self.camera_id)
 
-		if SKIP_ALREADY_DOWNLOADED and os.path.exists(location):
-			print(location + " already downloaded.")
-			return
+
+		#if SKIP_ALREADY_DOWNLOADED and os.path.exists(location):
+		#	print(location + " already downloaded.")
+		#	return
 
 		print("downloading to " + location)
 		zf = download(self.camera_id, self.month, self.year)

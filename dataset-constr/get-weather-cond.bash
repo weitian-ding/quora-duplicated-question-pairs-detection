@@ -8,12 +8,14 @@ if [ $# -ne 5 ]; then
 fi
 
 
+dir="${root_dir}/${1}"
+rm -rf $dir # remove if it presents
+mkdir -p $dir
+
 for year in `seq ${2} ${3}`
-do 
-	dir="${root_dir}/${1}/${year}"
-	mkdir -p $dir
+do
 	for month in `seq ${4} ${5}`
 	do
-		wget --content-disposition -O "${dir}/${month}.csv" "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${1}&Year=${year}&Month=${month}&Day=14&timeframe=1&submit=Download+Data" 
+		wget --content-disposition -O "${dir}/${year}-${month}.csv" "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${1}&Year=${year}&Month=${month}&Day=14&timeframe=1&submit=Download+Data"
 	done
 done
