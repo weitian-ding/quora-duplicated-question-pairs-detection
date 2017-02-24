@@ -3,13 +3,19 @@ import os
 from datetime import tzinfo, datetime
 from pytz import timezone
 import csv
+import sys
 
-CSV_FILENAME = 'GoC_weather_data/7558/2017/1.csv'
+CSV_ROOT = 'GoC_weather_data'
+IMG_ROOT = 'AMOS_Data'
+
 HEADER_OFFSET = 16
-WEATHER_TIMEZONE = 'Canada/Atlantic'
-IMG_PATH = 'AMOS_Data/00017965/2017.01'
 WEATHER_DEFAULT = 'DNE'
-OUTPUT_FILENAME = 'labels.csv'
+OUTPUT_FILENAME = 'labels_{}.csv'
+
+USAGE = '{} [[camera_id]] [[station_id]] [[local_timezone]]'
+
+TIME_LOWER_BOUND = 9   # 9 a.m.
+TIME_UPPER_BOUND = 16  # 4 p.m.
 
 # converts a timestamp to integers
 def utc_to_int(ts):
@@ -17,35 +23,68 @@ def utc_to_int(ts):
     return int(ts_round.strftime("%Y%m%d%H"))
 
 
-def main():
-    weather_table = {}
-    # read the weather conditions
-    with open(CSV_FILENAME, 'r') as in_file:
-        # skip the headers
-        for _ in range(HEADER_OFFSET):
-            next(in_file)
+# builds the weather condition lookup table
+def build_weather_table(station_id, tz, table):
+    for spreadsheet in os.listdir("{}/{}".format(CSV_ROOT, station_id)):
+        csv_filename = "{}/{}/{}".format(CSV_ROOT, station_id, spreadsheet)
+        with open(csv_filename, 'r') as in_file:
+            # skip the headers
+            for _ in range(HEADER_OFFSET):
+                next(in_file)
 
-        reader = csv.DictReader(in_file)
+            reader = csv.DictReader(in_file)
 
-        for row in reader:
-            ts = datetime.strptime(row['Date/Time'], '%Y-%m-%d %H:%M')
-            ts = ts.replace(tzinfo=timezone(WEATHER_TIMEZONE))  # convert to local time
-            ts = ts.astimezone(timezone('UTC'))  # convert to GMT
-            ts_id = utc_to_int(ts)
-            weather_table[ts_id] = row['Weather']
-            print('read', ts, row['Weather'])
+            for row in reader:
+                ts = datetime.strptime(row['Date/Time'], '%Y-%m-%d %H:%M')
+                ts = ts.replace(tzinfo=timezone(tz))  # convert to local time
+                ts = ts.astimezone(timezone('UTC'))  # convert to GMT
+                ts_id = utc_to_int(ts)
+                table[ts_id] = row['Weather']
+                print('read', ts, row['Weather'])
 
-    images = os.listdir(IMG_PATH)
-    labels = []
+
+# filters night-time images and generates weather condition labels
+def filter_and_gen_labels(camera_id, tz, labels, weather_table):
+    images = os.listdir("{}/{}".format(IMG_ROOT, camera_id))
     for img in images:  # image filename is GMT timestamp
         img_ts = datetime.strptime(img, '%Y%m%d_%H%M%S.jpg')
-        img_id = utc_to_int(img_ts)
-        weather = weather_table.get(img_id, WEATHER_DEFAULT)
-        labels.append(weather)  # look up the weather condition
-        print("{} => {}".format(img, weather))
+        img_ts = img_ts.replace(tzinfo=timezone('UTC'))
+
+        img_path = "{}/{}/{}".format(IMG_ROOT, camera_id, img)
+
+        # delete night time pictures
+        img_local_hours = img_ts.astimezone(timezone(tz)).hour
+
+        if img_local_hours < TIME_LOWER_BOUND or img_local_hours > TIME_UPPER_BOUND:
+            os.remove(img_path)
+            print("deleted {} due to night time".format(img_path))
+        else:
+            img_id = utc_to_int(img_ts)
+            if img_id in weather_table:
+                weather = weather_table[img_id]
+            else:
+                os.remove("{}/{}/{}".format(IMG_ROOT, camera_id, img))
+                print('deleted {} due to missing weather condition'.format(img_path))
+            labels.append(weather)  # look up the weather condition
+            print("{} => {}".format(img, weather))
+
+
+def main():
+    if len(sys.argv) != 4:
+        print(USAGE.format(sys.argv[0]))
+
+    camera_id = sys.argv[1]
+    station_id = sys.argv[2]
+    tz = sys.argv[3]
+
+    weather_table = {}
+    labels = []
+
+    build_weather_table(station_id, tz, weather_table)
+    filter_and_gen_labels(camera_id, tz, labels, weather_table)
 
     # writes the labels to csv file
-    with open(OUTPUT_FILENAME, 'w') as out_file:
+    with open(OUTPUT_FILENAME.format(station_id), 'w') as out_file:
         writer = csv.writer(out_file)
         writer.writerow(labels)
 
