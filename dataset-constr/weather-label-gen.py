@@ -82,6 +82,7 @@ def filter_and_gen_labels(camera_id, tz, labels, weather_table):
 def main():
     if len(sys.argv) != 4:
         print(USAGE.format(sys.argv[0]))
+        exit(0)
 
     camera_id = sys.argv[1]
     station_id = sys.argv[2]
