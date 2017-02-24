@@ -17,10 +17,10 @@ ROOT_LOCATION = None
 
 # change these parameters as necessary to download whichever camera or year or month you
 # want to download.
-CAMERAS_TO_DOWNLOAD = [17965]
-YEARS_TO_DOWNLOAD = [2016]
+#CAMERAS_TO_DOWNLOAD = [17965]
+#YEARS_TO_DOWNLOAD = [2016]
 #MONTHS_TO_DOWNLOAD = range(1,13)
-MONTHS_TO_DOWNLOAD = range(1,12)
+#MONTHS_TO_DOWNLOAD = range(1,12)
 # if the script crashed or the power went out or something, this flag will
 # skip downloading and unzipping a month's worth of images if there's already
 # a folder where it should be.  If you set this to false, then downloads
@@ -125,12 +125,21 @@ def ensure_directory_exists(path):
 			
 
 def main():
+    if len(sys.argv) != 6:
+        print("{} [[camera_id]] [[year_begin]] [[year_end]] [[month_begin]] [[month_end]]".format(sys.argv[0]))
+        exit(0)
+
+    cameras = [sys.argv[1]]
+    years = range(int(sys.argv[2]), int(sys.argv[3] + 1))
+    months = range(int(sys.argv[3]), int(sys.argv[4] + 1))
+
+
     # for all cameras...
-    for camera_id in CAMERAS_TO_DOWNLOAD:
+    for camera_id in cameras:
         # for all years...
-        for year in YEARS_TO_DOWNLOAD:
+        for year in years:
             # for all months of imagery...
-            for month in MONTHS_TO_DOWNLOAD:
+            for month in months:
 
 				thread_count = threading.activeCount()
 				while thread_count > MAX_THREADS:
