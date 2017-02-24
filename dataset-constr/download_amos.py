@@ -130,8 +130,8 @@ def main():
         exit(0)
 
     cameras = [sys.argv[1]]
-    years = range(int(sys.argv[2]), int(sys.argv[3] + 1))
-    months = range(int(sys.argv[3]), int(sys.argv[4] + 1))
+    years = range(int(sys.argv[2]), int(sys.argv[3]) + 1)
+    months = range(int(sys.argv[4]), int(sys.argv[5]) + 1)
 
 
     # for all cameras...
