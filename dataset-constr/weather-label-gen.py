@@ -10,7 +10,8 @@ IMG_ROOT = 'AMOS_Data'
 
 HEADER_OFFSET = 16
 WEATHER_DEFAULT = 'DNE'
-OUTPUT_FILENAME = 'labels_{}.csv'
+LABEL_FILENAME = 'labels_{}.csv'
+MAPPING_FILENAME = 'mappings_{}.csv'
 
 USAGE = '{} [[camera_id]] [[station_id]] [[local_timezone]]'
 
@@ -25,6 +26,7 @@ def utc_to_int(ts):
 
 # builds the weather condition lookup table
 def build_weather_table(station_id, tz, table):
+    mapping = []
     for spreadsheet in os.listdir("{}/{}".format(CSV_ROOT, station_id)):
         csv_filename = "{}/{}/{}".format(CSV_ROOT, station_id, spreadsheet)
         with open(csv_filename, 'r') as in_file:
@@ -39,8 +41,16 @@ def build_weather_table(station_id, tz, table):
                 ts = ts.replace(tzinfo=timezone(tz))  # convert to local time
                 ts = ts.astimezone(timezone('UTC'))  # convert to GMT
                 ts_id = utc_to_int(ts)
-                table[ts_id] = row['Weather']
+                try:
+                    weather = row['Weather'].split(',')[0]  # takes the first weather condition
+                except AttributeError:
+                    print("{} malformed".format(row))
+                if weather not in mapping:
+                    mapping.append(weather)
+                table[ts_id] = mapping.index(weather)
                 print('read', ts, row['Weather'])
+
+    return mapping
 
 
 # filters night-time images and generates weather condition labels
@@ -80,13 +90,18 @@ def main():
     weather_table = {}
     labels = []
 
-    build_weather_table(station_id, tz, weather_table)
+    mapping = build_weather_table(station_id, tz, weather_table)
     filter_and_gen_labels(camera_id, tz, labels, weather_table)
 
     # writes the labels to csv file
-    with open(OUTPUT_FILENAME.format(station_id), 'w') as out_file:
+    with open(LABEL_FILENAME.format(camera_id), 'w') as out_file:
         writer = csv.writer(out_file)
         writer.writerow(labels)
+
+    # writes mapping to csv file
+    with open(MAPPING_FILENAME.format(station_id), 'w') as out_file:
+        for idx,weather in enumerate(mapping):
+            out_file.write("{},{}\n".format(idx, weather))
 
 
 if __name__ == "__main__":
