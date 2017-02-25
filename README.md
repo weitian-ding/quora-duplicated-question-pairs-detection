@@ -23,3 +23,9 @@ Filter images taken at night time and generate weather condition labels for all 
 python weather-label-gen.py [[camera_id]] [[station_id]] [[local_timezone]]
 ```
 
+### Step 4:
+Crop and resize the images.
+```
+cd AMOS_Data
+python ../../crop
+```
