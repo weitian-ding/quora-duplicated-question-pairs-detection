@@ -7,7 +7,7 @@ start_time = time.time()
 
 directory = os.getcwd()
 # read a image and crop
-crop_box = (0,75,800,300) #(left, upper, right, lower)
+crop_box = (0,70,800,420) #(left, upper, right, lower)
 
 #actual code
 for filename in os.listdir(directory):
@@ -20,7 +20,8 @@ for filename in os.listdir(directory):
         im = Image.open(filename)
         fn = filename[:-4]
         I = im.crop(crop_box)
-        I.save('%s_crop.jpg' % fn)
+        I = I.resize((80, 35), Image.ANTIALIAS)
+        I.save('%s_crop.jpg'%fn)
         os.remove(filename)
 
 #timer
