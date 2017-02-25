@@ -21,8 +21,7 @@ for filename in os.listdir(directory):
         fn = filename[:-4]
         I = im.crop(crop_box)
         I = I.resize((80, 35), Image.ANTIALIAS)
-        I.save('%s_crop.jpg'%fn)
-        os.remove(filename)
+        I.save('%s.jpg'%fn)
 
 #timer
 print("--- %s seconds ---" % (time.time() - start_time))
