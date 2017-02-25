@@ -129,7 +129,7 @@ def main():
         print("{} [[camera_id]] [[year_begin]] [[year_end]] [[month_begin]] [[month_end]]".format(sys.argv[0]))
         exit(0)
 
-    cameras = [sys.argv[1]]
+    cameras = [int(sys.argv[1])]
     years = range(int(sys.argv[2]), int(sys.argv[3]) + 1)
     months = range(int(sys.argv[4]), int(sys.argv[5]) + 1)
 
