@@ -1,1 +1,5 @@
 *.csv
+GoogleNews-vectors-negative300.bin
+.idea/
+GoogleNews-vectors-negative300.bin
+__pycache__/
