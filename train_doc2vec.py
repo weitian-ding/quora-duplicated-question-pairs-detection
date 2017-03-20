@@ -30,6 +30,7 @@ def main():
     model.build_vocab(questions.questions, keep_raw_vocab=True)
 
     for epoch in range(20):
+        print("iter {0}".format(epoch))
         shuffle(questions.questions)
         model.train(questions.questions)
 
