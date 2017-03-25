@@ -1,11 +1,17 @@
 *.csv
 GoogleNews-vectors-negative300.bin
 .idea/
-GoogleNews-vectors-negative300.bin
+
 __pycache__/
 
 
 *.m
 *.mlx
 
-*.txt
+
+*.pem
+drtoolbox/
+
+*.zip
+
+*.pkl
