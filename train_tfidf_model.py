@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from quora_question_pairs_helpers import QuoraQuestions, tokenize
 
-TRAIN_FILE = 'train_balanced.csv'
+TRAIN_FILE = 'train.csv'
 TEST_FILE = ''
 
 MODEL_FILE = 'tfidf.pkl'

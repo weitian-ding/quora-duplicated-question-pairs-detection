@@ -12,7 +12,6 @@ BLACK_LIST = ['.', ',', '?', ')', '(']
 stemmer = SnowballStemmer(language="english")  # stemmer
 
 
-
 def tokenize(text):
     #tokens = word_tokenize(text.lower())
 
@@ -29,11 +28,12 @@ def tokenize(text):
 
 class TaggedQuestions(object):
 
-    def __init__(self, train_filename, test_filename="", stem=False):
+    def __init__(self, train_filename, stem=False):
         self.trainFile = train_filename
-        self.testFile = test_filename
-        self.stem = stem
+        #self.testFile = test_filename
+        #self.stem = stem
 
+        '''
         self.questions = []
         for question in self:
             self.questions.append(question)
@@ -41,6 +41,7 @@ class TaggedQuestions(object):
         self.words = []
         for question in self.questions:
             self.words = self.words + question.words
+        '''
 
     # TODO implement it with QuoraQuestionPair
     def __iter__(self):
@@ -52,9 +53,10 @@ class TaggedQuestions(object):
                 q1 = row['question1']
                 q2 = row['question2']
 
-                yield TaggedDocument(words=tokenize(q1, stem=self.stem), tags=[row['qid1']])
-                yield TaggedDocument(words=tokenize(q2, stem=self.stem), tags=[row['qid2']])
+                yield TaggedDocument(words=word_tokenize(q1), tags=[row['qid1']])
+                yield TaggedDocument(words=word_tokenize(q2), tags=[row['qid2']])
 
+        '''
         if self.testFile != "":
             # testing set
             with open(self.testFile, 'r') as csv_file:
@@ -64,14 +66,17 @@ class TaggedQuestions(object):
                     q1 = row['question1']
                     q2 = row['question2']
 
-                    yield TaggedDocument(words=tokenize(q1, stem=self.stem), tags=['TEST_%s_Q1' % row['test_id']])
-                    yield TaggedDocument(words=tokenize(q2, stem=self.stem), tags=['TEST_%s_Q2' % row['test_id']])
+                    yield TaggedDocument(words=word_tokenize(q1), tags=['TEST_%s_Q1' % row['test_id']])
+                    yield TaggedDocument(words=word_tokenize(q2), tags=['TEST_%s_Q2' % row['test_id']])
+        '''
 
+    '''
     def sentences(self):
         return self.questions
 
     def words(self):
         return self.words
+    '''
 
 
 class QuoraQuestionPairs(object):

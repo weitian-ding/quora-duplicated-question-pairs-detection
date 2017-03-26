@@ -13,6 +13,7 @@ def main():
     train_data = np.loadtxt(TRAIN_DATA, delimiter=',')
     print('{0} training data loaded'.format(train_data.shape))
 
+    # split training data
     train_data, valid_data = train_test_split(train_data, test_size=0.2, random_state=4242)
 
     x_train = train_data[:,1:]
