@@ -4,10 +4,10 @@ from sklearn.metrics import roc_auc_score
 
 from quora_question_pairs_helpers import QuoraQuestionPairs, tokenize
 
-TRAIN_FILE = "train_balanced.csv"
-TEST_FILE = "test.csv"
+TRAIN_FILE = "../train_balanced.csv"
+TEST_FILE = "../test.csv"
 
-TRAIN_OUTPUT_FILE = "feature_word_share_train.csv"
+TRAIN_OUTPUT_FILE = "feature_word_share_train_s.csv"
 TEST_OUTPUT_FILE = "feature_word_share_test.csv"
 
 TOKEN_BLACKLIST = []
