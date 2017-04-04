@@ -48,7 +48,7 @@ def avg_w2v(para):
 def pair2vec(str1, str2):
     vec1 = avg_w2v(str1)
     vec2 = avg_w2v(str2)
-    return {
+    return pd.Series({
         'euclidean': euclidean(vec1, vec2),
         'manhattan': cityblock(vec1, vec2),
         'canberra': canberra(vec1, vec2),
@@ -57,22 +57,24 @@ def pair2vec(str1, str2):
         'skew2': skew(vec2),
         'kurtosis1': kurtosis(vec1),
         'kurtosis2': kurtosis(vec2)
-    }
+    })
 
 
 def main():
     if TRAIN_DATA != '':
         print('embedding training data...')
         train = pd.read_csv(TRAIN_DATA)
+        # print(train.head())
+        # train.apply(lambda r: pair2vec(r.question1, r.question2))
 
-        train.merge(train.apply(lambda r: pair2vec(r.question1, r.question2)), left_index=True, right_index=True)
+        train.merge(train.apply(lambda r: pair2vec(r.question1, r.question2), axis=1), left_index=True, right_index=True)
 
         # rescale
         #train['avg_w2v_eu_dist'] = (train['avg_w2v_eu_dist'] - train['avg_w2v_eu_dist'].min()) / (train['avg_w2v_eu_dist'].max() - train['avg_w2v_eu_dist'].min())
         #train['avg_w2v_eu_dist'] = train['avg_w2v_eu_dist'].apply(lambda dist: 1. - dist)  # covert normalized distance to probability
 
         #print('AVG W2V EU DIST AUC:', roc_auc_score(train['is_duplicate'], train['avg_w2v_eu_dist']))
-
+        print(train.head())
         train.to_csv(TRAIN_FEATURE, index=False, header=False, columns=['eculidean', 'manhattan', 'canberra', 'skew1'
                                                                         'skew2', 'kurtosis1', 'kurtosis2'])
 
