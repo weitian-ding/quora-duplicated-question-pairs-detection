@@ -9,8 +9,8 @@ from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
 from sklearn.metrics import roc_auc_score
 
-TRAIN_DATA = '../train_sample.csv'
-TEST_DATA =  '', #''../test.csv'
+TRAIN_DATA = '../train_balanced.csv'
+TEST_DATA =  '../test.csv'
 
 TRAIN_FEATURE = 'features_avg_w2v_train.csv'
 TEST_FEATURE = 'feature_avg_w2v_test.csv'
@@ -18,8 +18,6 @@ TEST_FEATURE = 'feature_avg_w2v_test.csv'
 MODEL = '../models/GoogleNews-Vectors-negative300.bin'
 
 DIM = 300
-
-BATCH_SIZE = 10000
 
 stops = stopwords.words('english')
 punc_map = str.maketrans('', '', string.punctuation)
@@ -60,36 +58,23 @@ def pair2vec(str1, str2):
     })
 
 
+def extract_features(df):
+    features = df.apply(lambda r: pair2vec(r.question1, r.question2), axis=1)
+    return features
+
+
 def main():
     if TRAIN_DATA != '':
         print('embedding training data...')
         train = pd.read_csv(TRAIN_DATA)
-        # print(train.head())
-        # train.apply(lambda r: pair2vec(r.question1, r.question2))
-
-        train = train.merge(train.apply(lambda r: pair2vec(r.question1, r.question2), axis=1), left_index=True, right_index=True)
-
-        # rescale
-        #train['avg_w2v_eu_dist'] = (train['avg_w2v_eu_dist'] - train['avg_w2v_eu_dist'].min()) / (train['avg_w2v_eu_dist'].max() - train['avg_w2v_eu_dist'].min())
-        #train['avg_w2v_eu_dist'] = train['avg_w2v_eu_dist'].apply(lambda dist: 1. - dist)  # covert normalized distance to probability
-
-        #print('AVG W2V EU DIST AUC:', roc_auc_score(train['is_duplicate'], train['avg_w2v_eu_dist']))
-        print(train.head())
-        train.to_csv(TRAIN_FEATURE, index=False, header=False, columns=['eculidean', 'manhattan', 'canberra', 'skew1'
-                                                                        'skew2', 'kurtosis1', 'kurtosis2'])
+        train_features = extract_features(train)
+        train_features.to_csv(TRAIN_FEATURE, index=False, header=False)
 
     if TEST_DATA != '':
         print('embedding testing data...')
         test = pd.read_csv(TEST_DATA)
-
-        test['avg_w2v_eu_dist'] = test.apply(lambda r: pair2vec(r.question1, r.question2), axis=1)
-
-        # rescale
-        test['avg_w2v_eu_dist'] = (test['avg_w2v_eu_dist'] - test['avg_w2v_eu_dist'].min()) / (test['avg_w2v_eu_dist'].max() - test['avg_w2v_eu_dist'].min())
-        test['avg_w2v_eu_dist'] = test['avg_w2v_eu_dist'].apply(
-            lambda dist: 1. - dist)  # covert normalized distance to probability
-
-        test['avg_w2v_eu_dist'].to_csv(TEST_FEATURE, index=False, header=False)
+        test_features = extract_features(test)
+        test_features.to_csv(TEST_FEATURE, index=False, header=False)
 
 
 if __name__ == '__main__':
