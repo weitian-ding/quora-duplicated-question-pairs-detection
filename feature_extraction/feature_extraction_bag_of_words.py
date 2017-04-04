@@ -12,8 +12,8 @@ VEC_DIM = 1
 TRAIN_FILE = "../train_balanced.csv"
 TEST_FILE = '../test.csv' #"../test.csv"
 
-TRAIN_OUTPUT_FILE = "feature_bow_train.csv"
-TEST_OUTPUT_FILE = "feature_bow_test.csv"
+TRAIN_OUTPUT_FILE = "features_bow_train.csv"
+TEST_OUTPUT_FILE = "features_bow_test.csv"
 
 DIM = 5
 
@@ -48,7 +48,7 @@ def main():
         print('embedding training data...')
         embeddings = embed(TRAIN_FILE, model)
 
-        np.savetxt(TRAIN_OUTPUT_FILE, embeddings)
+        np.savetxt(TRAIN_OUTPUT_FILE, embeddings, delimiter=',')
 
         print("{0} training data embedded".format(embeddings.shape))
 
@@ -59,7 +59,7 @@ def main():
         print('embedding testing data...')
 
         embeddings = embed(TEST_FILE, model)
-        np.savetxt(TEST_OUTPUT_FILE, embeddings)
+        np.savetxt(TEST_OUTPUT_FILE, embeddings, delimiter=',')
 
         print("{0} testing data embedded".format(embeddings.shape))
 
