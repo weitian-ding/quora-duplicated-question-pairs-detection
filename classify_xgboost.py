@@ -3,8 +3,8 @@ import xgboost as xgb
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-TRAIN_DATA = "features_train.csv"
-TEST_DATA = "features_test.csv"
+TRAIN_DATA = "feature_extraction/features_train.csv"
+TEST_DATA = "feature_extraction/features_test.csv"
 
 SUBMISSION_FILE = 'submission.csv'
 
@@ -17,9 +17,7 @@ def main():
     train_data, valid_data = train_test_split(train_data, test_size=0.2, random_state=4242)
 
     x_train = train_data[:,1:]
-    print('{0}'.format(x_train.shape))
     y_train = train_data[:,0]  # labels
-    print('{0}'.format(y_train.shape))
 
     x_valid = valid_data[:,1:]
     y_valid = valid_data[:,0]  # labels

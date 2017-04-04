@@ -1,5 +1,5 @@
 *.csv
-GoogleNews-vectors-negative300.bin
+models/GoogleNews-vectors-negative300.bin
 .idea/
 
 __pycache__/
@@ -15,3 +15,10 @@ drtoolbox/
 *.zip
 
 *.pkl
+
+# old scripts
+pair2vec*
+log_reg_classify.py
+log_reg_classify_tfidf.py
+
+*.txt

@@ -1,4 +1,5 @@
 import csv
+import string
 
 from gensim.models.doc2vec import TaggedDocument
 from nltk import word_tokenize, SnowballStemmer
@@ -10,6 +11,7 @@ MODEL_FILE = 'doc2vec_model.txt'
 BLACK_LIST = ['.', ',', '?', ')', '(']
 
 stemmer = SnowballStemmer(language="english")  # stemmer
+punc = str.maketrans(string.punctuation, ' '  * len(string.punctuation))
 
 
 def tokenize(text):

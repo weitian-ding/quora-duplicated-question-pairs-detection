@@ -7,7 +7,7 @@ from quora_question_pairs_helpers import TaggedQuestions
 
 VEC_DIM = 400
 
-TRAIN_FILE = 'train_sample.csv'
+TRAIN_FILE = '../train_sample.csv'
 NUM_CORES = 2
 ITER = 20
 

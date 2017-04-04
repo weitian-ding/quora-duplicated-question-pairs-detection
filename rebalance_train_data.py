@@ -13,7 +13,7 @@ TEST = 'cv_test.csv'
 
 LABEL_FILE = "labels.csv"
 
-RATIO = 0.165
+RATIO = 0.1742452565
 
 def main():
     pos_counter = 0

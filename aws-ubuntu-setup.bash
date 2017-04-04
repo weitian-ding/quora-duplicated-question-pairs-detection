@@ -11,6 +11,6 @@ sudo -H pip3 install gensim
 sudo -H pip3 install nltk
 sudo -H pip3 install scikit-learn
 
-sudo python -c 'import nltk; nltk.download("all")'
+#sudo python -c 'import nltk; nltk.download("all")'
 
 
