@@ -29,7 +29,7 @@ def main():
     params['objective'] = 'binary:logistic'
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
-    params['max_depth'] = 10
+    params['max_depth'] = 15
     params["subsample"] = 0.7
     params["min_child_weight"] = 1
     params["colsample_bytree"] = 0.7
