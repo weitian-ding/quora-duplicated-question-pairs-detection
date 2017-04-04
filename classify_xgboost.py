@@ -30,8 +30,13 @@ def main():
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
     params['max_depth'] = 4
+    params["subsample"] = 0.7
+    params["min_child_weight"] = 1
+    params["colsample_bytree"] = 0.7
+    params["silent"] = 1
+    params["seed"] = 1632
 
-    bst = xgb.train(params, d_train, 400, [(d_train, 'train'), (d_valid, 'valid')], early_stopping_rounds=50, verbose_eval=10)
+    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'valid')], early_stopping_rounds=50, verbose_eval=10)
 
     # making predictions
     print('loading testing data...')
