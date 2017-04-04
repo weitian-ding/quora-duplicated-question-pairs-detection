@@ -10,7 +10,8 @@ sudo -H pip3 install --upgrade pip
 sudo -H pip3 install gensim
 sudo -H pip3 install nltk
 sudo -H pip3 install scikit-learn
+sudo -H pip3 install pandas
 
-#sudo python -c 'import nltk; nltk.download("all")'
+sudo python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
 wget https://s3.amazonaws.com/mordecai-geo/GoogleNews-vectors-negative300.bin.gz
