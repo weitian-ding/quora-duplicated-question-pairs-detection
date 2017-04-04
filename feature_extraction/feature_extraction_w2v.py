@@ -67,7 +67,7 @@ def main():
         # print(train.head())
         # train.apply(lambda r: pair2vec(r.question1, r.question2))
 
-        train.merge(train.apply(lambda r: pair2vec(r.question1, r.question2), axis=1), left_index=True, right_index=True)
+        train = train.merge(train.apply(lambda r: pair2vec(r.question1, r.question2), axis=1), left_index=True, right_index=True)
 
         # rescale
         #train['avg_w2v_eu_dist'] = (train['avg_w2v_eu_dist'] - train['avg_w2v_eu_dist'].min()) / (train['avg_w2v_eu_dist'].max() - train['avg_w2v_eu_dist'].min())
