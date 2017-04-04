@@ -1,7 +1,3 @@
-'''
-cosine similarity
-'''
-
 import numpy as np
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score

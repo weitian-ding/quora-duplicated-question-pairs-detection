@@ -13,4 +13,4 @@ sudo -H pip3 install scikit-learn
 
 #sudo python -c 'import nltk; nltk.download("all")'
 
-
+wget https://s3.amazonaws.com/mordecai-geo/GoogleNews-vectors-negative300.bin.gz
