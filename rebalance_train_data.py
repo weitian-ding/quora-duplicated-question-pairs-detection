@@ -8,10 +8,9 @@ from quora_question_pairs_helpers import QuoraQuestionPairs
 
 TRAIN_DATA = 'train.csv'
 
-TRAIN_BALANCED = 'train_balanced.csv'
-TEST = 'cv_test.csv'
+TRAIN_BALANCED = 'train_balanced.csv3'
 
-LABEL_FILE = "labels.csv"
+LABEL_FILE = "labels.csv3"
 
 RATIO = 0.1742452565
 
@@ -38,10 +37,7 @@ def main():
 
     balanced_data = pos_rows + neg_rows
 
-    shuffle(balanced_data)
-
-    #train, test = train_test_split(balanced_data, test_size=0.2, random_state=4242)
-
+    shuffle(balanced_data, lambda: 0.5)
 
     with open(TRAIN_BALANCED, 'w') as csv_file:
         fieldnames = ["id", "qid1", "qid2", "question1", "question2", "is_duplicate"]
