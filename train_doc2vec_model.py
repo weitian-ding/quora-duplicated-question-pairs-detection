@@ -7,12 +7,11 @@ from quora_question_pairs_helpers import TaggedQuestions
 
 VEC_DIM = 400
 
-TRAIN_FILE = '../train_sample.csv'
+TRAIN_FILE = 'train_sample.csv'
 NUM_CORES = 2
 ITER = 20
 
-MODEL_FILE = 'doc2vec_model_test.txt'
-USAGE = 'train_doc2vec.py <train-file> <test-file> <num-workers>'
+MODEL_FILE = 'models/doc2vec_model_test.txt'
 
 
 def main():

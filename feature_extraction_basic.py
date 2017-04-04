@@ -9,8 +9,8 @@ from sklearn.metrics import roc_auc_score
 from feature_extraction.feature_extraction_diff_ratio import seq
 from quora_question_pairs_helpers import QuoraQuestionPairs, tokenize
 
-TRAIN_FILE = "../train_balanced.csv"
-TEST_FILE ="../test.csv"
+TRAIN_FILE = "train_balanced.csv"
+TEST_FILE ="test.csv"
 
 TRAIN_OUTPUT_FILE = "features_basic_train.csv"
 TEST_OUTPUT_FILE = "features_basic_test.csv"

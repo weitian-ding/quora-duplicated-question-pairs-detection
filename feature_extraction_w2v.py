@@ -9,13 +9,13 @@ from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
 from sklearn.metrics import roc_auc_score
 
-TRAIN_DATA = '../train_balanced.csv'
-TEST_DATA =  '../test.csv'
+TRAIN_DATA = 'train_balanced.csv'
+TEST_DATA =  'test.csv'
 
 TRAIN_FEATURE = 'features_avg_w2v_train.csv'
 TEST_FEATURE = 'feature_avg_w2v_test.csv'
 
-MODEL = '../models/GoogleNews-Vectors-negative300.bin'
+MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 
 DIM = 300
 
@@ -46,7 +46,7 @@ def avg_w2v(para):
 def pair2vec(str1, str2):
     vec1 = avg_w2v(str1)
     vec2 = avg_w2v(str2)
-    return pd.Series({
+    features = pd.Series({
         'euclidean': euclidean(vec1, vec2),
         'manhattan': cityblock(vec1, vec2),
         'canberra': canberra(vec1, vec2),
@@ -56,10 +56,12 @@ def pair2vec(str1, str2):
         'kurtosis1': kurtosis(vec1),
         'kurtosis2': kurtosis(vec2)
     })
+    return features
 
 
 def extract_features(df):
-    features = df.apply(lambda r: pair2vec(r.question1, r.question2), axis=1)
+    features = df.apply(lambda r: pair2vec(str(r.question1), str(r.question2)), axis=1)
+    features.fillna(.0)
     return features
 
 

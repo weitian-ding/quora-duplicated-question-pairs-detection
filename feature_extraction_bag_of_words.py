@@ -5,12 +5,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from quora_question_pairs_helpers import QuoraQuestionPairs
 
-MODEL_FILE = '../models/tfidf.pkl'
+MODEL_FILE = 'models/tfidf.pkl'
 
 VEC_DIM = 1
 
-TRAIN_FILE = "../train_balanced.csv"
-TEST_FILE = '../test.csv' #"../test.csv"
+TRAIN_FILE = "train_balanced.csv"
+TEST_FILE = 'test.csv' #"../test.csv"
 
 TRAIN_OUTPUT_FILE = "features_bow_train.csv"
 TEST_OUTPUT_FILE = "features_bow_test.csv"

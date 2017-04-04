@@ -3,10 +3,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from .. import quora_question_pairs_helpers as Quroa
 
-TRAIN_FILE = '../train.csv'
-TEST_FILE = '../test.csv'
+TRAIN_FILE = 'train.csv'
+TEST_FILE = 'test.csv'
 
-MODEL_FILE = 'tfidf.pkl'
+MODEL_FILE = 'models/tfidf.pkl'
 
 def main():
     # fit tf-idf model
