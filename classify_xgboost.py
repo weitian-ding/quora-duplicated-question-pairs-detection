@@ -10,7 +10,7 @@ SUBMISSION_FILE = 'submission.csv'
 
 def main():
     print('loading training set...')
-    train_data = pd.read_csv(TRAIN_DATA)
+    train_data = pd.read_csv(TRAIN_DATA, header=None)
     train_data = train_data.as_matrix()
     print('{0} training data loaded'.format(train_data.shape))
 
@@ -30,7 +30,7 @@ def main():
     params['objective'] = 'binary:logistic'
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
-    params['max_depth'] = 15
+    params['max_depth'] = 10
     params["subsample"] = 0.7
     params["min_child_weight"] = 1
     params["colsample_bytree"] = 0.7
@@ -41,7 +41,7 @@ def main():
 
     # making predictions
     print('loading testing data...')
-    test_data = pd.read_csv(TEST_DATA)
+    test_data = pd.read_csv(TEST_DATA, header=None)
     test_data = test_data.as_matrix()
     print('{0} testing data loaded'.format(test_data.shape))
 
