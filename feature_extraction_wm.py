@@ -2,8 +2,8 @@ import pandas as pd
 from gensim.models import KeyedVectors
 from sklearn.metrics import roc_auc_score
 
-TRAIN_DATA = 'data/train_sample.csv'
-TEST_DATA =  '' #'data/test.csv'
+TRAIN_DATA = 'data/train_balanced.csv'
+TEST_DATA =  'data/test.csv'
 
 TRAIN_FEATURE = 'features/features_wm_train.csv'
 TEST_FEATURE = 'features/features_wm_test.csv'
@@ -25,12 +25,15 @@ def main():
         train = pd.read_csv(TRAIN_DATA)
         train_features = extract_features(train)
         train_features.to_csv(TRAIN_FEATURE, index=False, header=False)
+        print(train_features.head())
 
+        '''
         rescaled = 1. - ((train_features - train_features.min()) / (train_features.max() - train_features.min()))
         print(rescaled.head())
         rescaled.fillna(.0)
         print('fuzz_partial_token_sort_ratio AUC:',
               roc_auc_score(train['is_duplicate'], rescaled))
+        '''
 
     if TEST_DATA != '':
         print('embedding testing data...')
