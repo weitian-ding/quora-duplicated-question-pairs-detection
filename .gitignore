@@ -22,3 +22,5 @@ log_reg_classify.py
 log_reg_classify_tfidf.py
 
 *.txt
+
+models/

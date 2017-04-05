@@ -10,7 +10,8 @@ SUBMISSION_FILE = 'submission.csv'
 
 def main():
     print('loading training set...')
-    train_data = np.loadtxt(TRAIN_DATA, delimiter=',')
+    train_data = pd.read_csv(TRAIN_DATA)
+    train_data = train_data.as_matrix()
     print('{0} training data loaded'.format(train_data.shape))
 
     # split training data
@@ -40,7 +41,8 @@ def main():
 
     # making predictions
     print('loading testing data...')
-    test_data = np.loadtxt(TEST_DATA, delimiter=',')
+    test_data = pd.read_csv(TEST_DATA)
+    test_data = test_data.as_matrix()
     print('{0} testing data loaded'.format(test_data.shape))
 
     print('making predictions...')
