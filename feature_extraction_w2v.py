@@ -9,11 +9,11 @@ from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
 from sklearn.metrics import roc_auc_score
 
-TRAIN_DATA = '' #''data/train_balanced.csv'
-TEST_DATA =  'data/test.csv'
+TRAIN_DATA = 'data/train_balanced.csv'
+TEST_DATA =  '' #'data/test.csv'
 
 TRAIN_FEATURE = 'features/features_avg_w2v_train.csv'
-TEST_FEATURE = 'features/feature_avg_w2v_test.csv'
+TEST_FEATURE = 'features/features_avg_w2v_test.csv'
 
 MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 

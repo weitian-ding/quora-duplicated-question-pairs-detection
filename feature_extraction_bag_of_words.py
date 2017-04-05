@@ -27,6 +27,7 @@ def pair2vec(embedding1, embedding2):
     return np.array([cos[0, 0], sum1, sum2, mean1, mean2])
 
 
+# TODO implement with pandas
 def embed(filename, model):
     q1vecs = model.transform([pair['question1'] for pair in QuoraQuestionPairs.training_set(filename)])
     q2vecs = model.transform([pair['question2'] for pair in QuoraQuestionPairs.training_set(filename)])
