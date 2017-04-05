@@ -31,9 +31,9 @@ def main():
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
     params['max_depth'] = 10
-    params["subsample"] = 0.7
-    params["min_child_weight"] = 1
-    params["colsample_bytree"] = 0.7
+    params["subsample"] = 0.8
+    params["min_child_weight"] = 5
+    params["colsample_bytree"] = 0.8
     params["silent"] = 1
     params["seed"] = 1632
 
