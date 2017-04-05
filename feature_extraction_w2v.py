@@ -61,8 +61,7 @@ def pair2vec(str1, str2):
 
 def extract_features(df):
     features = df.apply(lambda r: pair2vec(str(r.question1), str(r.question2)), axis=1)
-    features.fillna(.0)
-    return features
+    return features.fillna(.0)
 
 
 def main():

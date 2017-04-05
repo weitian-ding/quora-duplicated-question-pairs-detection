@@ -1,5 +1,4 @@
 *.csv
-models/GoogleNews-vectors-negative300.bin
 .idea/
 
 __pycache__/
@@ -13,8 +12,6 @@ __pycache__/
 drtoolbox/
 
 *.zip
-
-*.pkl
 
 # old scripts
 pair2vec*
