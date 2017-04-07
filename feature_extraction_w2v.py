@@ -7,13 +7,12 @@ from nltk import word_tokenize
 from nltk.corpus import stopwords
 from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
-from sklearn.metrics import roc_auc_score
 
 TRAIN_DATA = 'data/train_balanced.csv'
-TEST_DATA =  '' #'data/test.csv'
+TEST_DATA =  'data/test.csv'
 
-TRAIN_FEATURE = 'features/features_avg_w2v_train.csv'
-TEST_FEATURE = 'features/features_avg_w2v_test.csv'
+TRAIN_FEATURE = 'features/features_norm_w2v_train.csv'
+TEST_FEATURE = 'features/features_norm_w2v_test.csv'
 
 MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 
@@ -40,7 +39,7 @@ def avg_w2v(para):
             counter += 1
             para_vec += model[token]
 
-    return para_vec / counter if counter > 0 else para_vec
+    return (para_vec / counter) if counter > 0 else para_vec
 
 
 def pair2vec(str1, str2):
@@ -54,14 +53,16 @@ def pair2vec(str1, str2):
         'skew1': skew(vec1),
         'skew2': skew(vec2),
         'kurtosis1': kurtosis(vec1),
-        'kurtosis2': kurtosis(vec2)
+        'kurtosis2': kurtosis(vec2),
+        'wminkowski': wminkowski(vec1, vec2, 2, np.ones(DIM)),
+        'cosine': cosine(vec1, vec2)
     })
     return features
 
 
 def extract_features(df):
     features = df.apply(lambda r: pair2vec(str(r.question1), str(r.question2)), axis=1)
-    return features.fillna(.0)
+    return features.replace([np.inf], 1e5).replace([-np.inf], -1e5).fillna(.0)
 
 
 def main():

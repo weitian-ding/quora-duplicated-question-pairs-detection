@@ -1,3 +1,4 @@
+from gensim.parsing import PorterStemmer
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -8,6 +9,11 @@ TEST_FILE = 'data/test.csv'
 
 MODEL_FILE = 'models/tfidf.pkl'
 
+stemmer = PorterStemmer()
+
+def tokenize(text):
+    tokens = [stemmer.stem(token) for token in word_tokenize(text.lower())]
+    return tokens
 
 def main():
     # fit tf-idf model
@@ -16,7 +22,8 @@ def main():
                             min_df=2,
                             stop_words='english',
                             use_idf=True,
-                            tokenizer=tokenize)
+                            tokenizer = tokenize,
+                            sublinear_tf=True)
 
     if TRAIN_FILE != '':
         tfidf.fit(QuoraQuestions.training_set(TRAIN_FILE))

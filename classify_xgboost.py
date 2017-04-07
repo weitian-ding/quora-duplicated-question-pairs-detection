@@ -1,6 +1,5 @@
-import numpy as np
-import xgboost as xgb
 import pandas as pd
+import xgboost as xgb
 from sklearn.model_selection import train_test_split
 
 TRAIN_DATA = "features/features_train.csv"
@@ -30,10 +29,10 @@ def main():
     params['objective'] = 'binary:logistic'
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
-    params['max_depth'] = 10
-    params["subsample"] = 0.8
-    params["min_child_weight"] = 5
-    params["colsample_bytree"] = 0.8
+    params['max_depth'] = 20
+    params["subsample"] = 0.7
+    params["min_child_weight"] = 3
+    params["colsample_bytree"] = 0.7
     params["silent"] = 1
     params["seed"] = 1632
 
@@ -53,6 +52,7 @@ def main():
     sub = pd.DataFrame()
     sub['test_id'] = range(0, p_test.shape[0])
     sub['is_duplicate'] = p_test
+    sub = sub.fillna(0.1742452565)
     sub.to_csv(SUBMISSION_FILE, index=False)
 
 if __name__ == '__main__':
