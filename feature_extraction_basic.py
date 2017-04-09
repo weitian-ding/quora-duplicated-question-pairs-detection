@@ -1,111 +1,104 @@
 import difflib
-import string
 
-import nltk
-import numpy as np
 import pandas as pd
+from nltk import word_tokenize, pos_tag, PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.metrics import roc_auc_score
 
-from quora_question_pairs_helpers import QuoraQuestionPairs, tokenize
+TRAIN_FILE = 'data/train_cleaned.csv'
+TEST_FILE = 'data/test_cleaned.csv'
 
-TRAIN_FILE = "train_balanced.csv"
-TEST_FILE ="test.csv"
-
-TRAIN_OUTPUT_FILE = "features/features_basic_train.csv"
-TEST_OUTPUT_FILE = "features/features_basic_test.csv"
+TRAIN_OUTPUT_FILE = "features/basic_train.csv"
+TEST_OUTPUT_FILE = "features/basic_test.csv"
 
 seq = difflib.SequenceMatcher()
 stops = stopwords.words('english')
-punc = str.maketrans('', '', string.punctuation)
-
-
-# remove punctuation in a string
-def remove_punc(str): # remove punctuation is a string
-    return str.lower().translate(punc)
-
+stemmer = PorterStemmer()
 
 def seq_ratio(st1, st2):
     seq.set_seqs(st1.lower(), st2.lower())
     return seq.ratio()
 
 
-def word_share_ratio(q1, q2):
-    return word_share_ratio_helper(tokenize(q1), tokenize(q2))
+def extract_noun(words):
+    return [w for w, t in pos_tag(words) if t[:1] in ['N']]
 
 
-def word_share_ratio_helper(words1, words2):
-    q1words = {}
-    q2words = {}
-    for word in words1:
-        if word not in stops:
-            q1words[word] = 1
-    for word in words2:
-        if word not in stops:
-            q2words[word] = 1
-    if len(q1words) == 0 or len(q2words) == 0:
-        return 0
-    shared_words_in_q1 = [w for w in q1words.keys() if w in q2words]
-    shared_words_in_q2 = [w for w in q2words.keys() if w in q1words]
-    R = (len(shared_words_in_q1) + len(shared_words_in_q2)) / (len(q1words) + len(q2words))
-    return R
+def word_share(words1, words2):
+    words1 = set(words1)
+    words2 = set(words2)
+    union_len = len(words1) + len(words2)
+    return len(words1.intersection(words2)) / union_len if union_len > 0 else .0
 
 
-def map_features(df_features):
-    df_features['question1_nouns'] = df_features.question1.map(
-        lambda x: [w for w, t in nltk.pos_tag(nltk.word_tokenize(str(x).lower())) if t[:1] in ['N']])
-
-    df_features['question2_nouns'] = df_features.question2.map(
-        lambda x: [w for w, t in nltk.pos_tag(nltk.word_tokenize(str(x).lower())) if t[:1] in ['N']])
-
-    df_features['z_len1'] = df_features.question1.map(lambda x: len(str(x)))
-
-    df_features['z_len2'] = df_features.question2.map(lambda x: len(str(x)))
-
-    df_features['z_word_len1'] = df_features.question1.map(lambda x: len(str(x).split()))
-
-    df_features['z_word_len2'] = df_features.question2.map(lambda x: len(str(x).split()))
-
-    df_features['z_match_ratio'] = df_features.apply(lambda r: seq_ratio(str(r.question1), str(r.question2)), axis=1)
-
-    df_features['z_noun_match'] = df_features.apply(
-        lambda r: word_share_ratio_helper(r.question1_nouns, r.question2_nouns), axis=1)  # takes long
-
-    df_features['z_word_match'] = df_features.apply(lambda r: word_share_ratio(str(r.question1), str(r.question2)), axis=1)
+def tokenize(txt):
+    tokens = word_tokenize(str(txt).lower())
+    try:
+        tokens = [stemmer.stem(w) for w in tokens if w not in stops]
+    except IndexError:
+        tokens = [w for w in tokens if w not in stops]
+    return tokens
 
 
-def main():
+def extract_features(df):
+    features = pd.DataFrame()
 
-    columns = ['z_len1', 'z_len2', 'z_word_len1', 'z_word_len2', 'z_match_ratio', 'z_noun_match', 'z_word_match']
+    # length features
+    print('extracting length features...')
 
-    if TRAIN_FILE != "":
-        print('loading training data...')
-        dataframe = pd.read_csv(TRAIN_FILE)
-        print('{0} training data loaded'.format(len(dataframe)))
+    df['q1_words'] = df.question1.map(tokenize)
+    df['q2_words'] = df.question2.map(tokenize)
 
-        print('loading labels...')
-        labels = np.array([int(pair['is_duplicate']) for pair in QuoraQuestionPairs.training_set(TRAIN_FILE)])
-        print('{0} labels loaded'.format(labels.shape))
+    features['q1_str_len'] = df.question1.map(lambda q: len(str(q)))
+    features['q2_str_len'] = df.question2.map(lambda q: len(str(q)))
+    features['abs_str_diff_len'] = features.q1_str_len.rsub(features.q2_str_len).abs()
 
-        print('embedding training data...')
-        map_features(dataframe)
+    features['q1_word_len'] = df.q1_words.map(lambda ws: len(ws))
+    features['q2_word_len'] = df.q2_words.map(lambda ws: len(ws))
 
-        print('WORD SHARE AUC:', roc_auc_score(labels, dataframe['z_word_match']))
-        print('noun match AUC:', roc_auc_score(labels, dataframe['z_noun_match']))
-        print('match ratio AUC:', roc_auc_score(labels, dataframe['z_match_ratio']))
+    features['q1_no_space_str_len'] = df.question1.map(lambda q: len(str(q).replace(' ', '')))
+    features['q2_no_space_str_len'] = df.question2.map(lambda q: len(str(q).replace(' ', '')))
 
-        dataframe.to_csv(TRAIN_OUTPUT_FILE, columns=columns, header=False, index=False)
+    features['common_word_count'] = df.apply(lambda r: len(set(r.q1_words).intersection(set(r.q2_words))), axis=1)
 
-    if TEST_FILE != "":
-        print('loading testing data...')
-        dataframe = pd.read_csv(TEST_FILE)
-        print('{0} testing data loaded'.format(len(dataframe)))
+    # extract noun
+    print('extracting nouns...')
 
-        print('embedding testing data...')
-        map_features(dataframe)
+    df['q1_nouns'] = df.q1_words.map(extract_noun)
+    df['q2_nouns'] = df.q2_words.map(extract_noun)
 
-        dataframe.to_csv(TEST_OUTPUT_FILE, columns=columns, header=False, index=False)
+    # match ratios
+    print('extracting match ratios...')
+
+    features['word_match'] = df.apply(lambda r: word_share(r.q1_words, r.q2_words), axis=1)
+    features['diff_seq_ratio'] = df.apply(lambda r: seq_ratio(str(r.question1), str(r.question2)), axis=1)
+    features['len_match'] = features.abs_str_diff_len / (features.q1_str_len + features.q2_str_len)
+    features['noun_match'] = df.apply(lambda r: word_share(r.q1_nouns, r.q2_nouns), axis=1)
+
+    return features.fillna(.0)
 
 
 if __name__ == "__main__":
-    main()
+
+    if TRAIN_FILE != "":
+        print('loading training data...')
+        df = pd.read_csv(TRAIN_FILE)
+
+        print('embedding training data...')
+        features = extract_features(df)
+
+        print('word_match accuracy:', roc_auc_score(df['is_duplicate'], features['word_match']))
+        print('noun_match accuracy:', roc_auc_score(df['is_duplicate'], features['noun_match']))
+        print('diff_seq_ratio accuracy:', roc_auc_score(df['is_duplicate'], features['diff_seq_ratio']))
+        print('len_match accuracy:', 1 - roc_auc_score(df['is_duplicate'], features['len_match']))
+
+        features.to_csv(TRAIN_OUTPUT_FILE, index=False)
+
+    if TEST_FILE != "":
+        print('loading testing data...')
+        df = pd.read_csv(TEST_FILE)
+
+        print('embedding testing data...')
+        features = extract_features(df)
+
+        features.to_csv(TEST_OUTPUT_FILE, index=False)
