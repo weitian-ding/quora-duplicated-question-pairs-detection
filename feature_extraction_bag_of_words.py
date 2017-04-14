@@ -5,7 +5,6 @@ from scipy.spatial.distance import cosine, jaccard, matching
 from scipy.stats import pearsonr
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
-from sklearn.metrics.pairwise import cosine_similarity
 
 from train_tfidf_model import tokenize
 
@@ -13,7 +12,7 @@ TFIDF_MODEL_FILE = 'models/bow_tfidf.pkl'
 BIN_MODEL_FILE = 'models/bow_bin.pkl'
 
 
-TRAIN_FILE = '' #'input/train.csv' #"data/train_balanced.csv"
+TRAIN_FILE = 'input/train.csv' #"data/train_balanced.csv"
 TEST_FILE = 'input/test.csv' #"../test.csv"
 
 TRAIN_OUTPUT_FILE = "features/bow_train.csv"
@@ -86,7 +85,8 @@ def main():
     print('loading tfidf models...')
     tfidf_model = joblib.load(TFIDF_MODEL_FILE)
     bin_model = joblib.load(BIN_MODEL_FILE)  # binary bag of word representation
-    #assert tokenize('') == [] # check whether tokenize is imported
+
+    assert tokenize('') == [] # check whether tokenize is imported
 
     if TRAIN_FILE != "":
         print('embedding training data...')

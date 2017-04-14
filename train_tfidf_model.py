@@ -8,8 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 TRAIN_FILE = 'input/train.csv'
 TEST_FILE = 'input/test.csv'
 
-MODEL_TFIDF_FILE = 'models/bow_tfidf2.pkl'
-MODEL_BIN_FILE = 'models/bow_bin2.pkl'
+MODEL_TFIDF_FILE = 'models/bow_tfidf.pkl'
+MODEL_BIN_FILE = 'models/bow_bin.pkl'
 
 '''
 stemmer = PorterStemmer()
@@ -37,7 +37,7 @@ def build_vectorizer(binary):
                             min_df=2,
                             ngram_range=(1, 1),
                             stop_words='english',
-                            # tokenizer=tokenize,
+                            tokenizer=tokenize,
                             sublinear_tf=False,
                             use_idf=use_idf,
                             norm=norm,
