@@ -1,59 +1,94 @@
 import pandas as pd
 import xgboost as xgb
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
-TRAIN_DATA = "features/features_train.csv"
-TEST_DATA = "features/features_test.csv"
+TRAIN_DATA = 'data/train_cleaned.csv'
+TRAIN_FEATURES = "features/train.csv"
+TEST_FEATURES = "features/test.csv"
 
-SUBMISSION_FILE = 'submission.csv'
+SUBMISSION_FILE = 'data/submission.csv'
+
+POS_PROP = 0.1742452565
+
+
+def rebalance(labelled_features):
+    pos_samples = labelled_features[labelled_features['is_duplicate'] == 1]
+    neg_samples = labelled_features[labelled_features['is_duplicate'] == 0]
+
+    needed = int(len(pos_samples) / POS_PROP - len(pos_samples))
+    multiplier = needed // len(neg_samples)
+    remainder = needed % len(neg_samples)
+
+    balanced = pd.concat([neg_samples] * multiplier + [neg_samples[:remainder], pos_samples], ignore_index=True)
+
+    return balanced
+
+
+def rebalance2(labelled_features):
+    pos_samples = labelled_features[labelled_features['is_duplicate'] == 1]
+    neg_samples = labelled_features[labelled_features['is_duplicate'] == 0]
+
+    pos_count = int(len(neg_samples) / (1 - POS_PROP) - len(neg_samples))
+    balanced = pd.concat([neg_samples, pos_samples[:pos_count]], ignore_index=True)
+
+    return balanced
+
 
 def main():
+
     print('loading training set...')
-    train_data = pd.read_csv(TRAIN_DATA, header=None)
-    train_data = train_data.as_matrix()
-    print('{0} training data loaded'.format(train_data.shape))
+    train_data = pd.read_csv(TRAIN_DATA)
+    train_features = pd.read_csv(TRAIN_FEATURES)
+    train_features = train_features.fillna(.0)
+    train_features['is_duplicate'] = train_data.is_duplicate
+    #train_features['weight'] = train_data.is_duplicate.map(lambda d: POS_PROP if d else ((1 - POS_PROP) / POS_PROP))
 
-    # split training data
-    train_data, valid_data = train_test_split(train_data, test_size=0.2, random_state=4242)
+    #print('check')
+    #print('word_match accuracy:', roc_auc_score(train_features['is_duplicate'], train_features['word_match']))
 
-    x_train = train_data[:,1:]
-    y_train = train_data[:,0]  # labels
+    print('creating cross-validation set...')
+    train_features,valid_features = train_test_split(train_features, test_size=0.2, random_state=4242)
 
-    x_valid = valid_data[:,1:]
-    y_valid = valid_data[:,0]  # labels
+    print('rebalance data...')
+    train_features = rebalance(train_features)
+    valid_features = rebalance2(valid_features)
+    print('label mean in training set is {0}'.format(train_features.is_duplicate.mean()))
+    print('label mean in cross-validation set is {0}'.format(valid_features.is_duplicate.mean()))
 
-    d_train = xgb.DMatrix(x_train, label=y_train)
-    d_valid = xgb.DMatrix(x_valid, label=y_valid)
+    d_train = xgb.DMatrix(train_features.drop(['is_duplicate'], axis=1),
+                          label=train_features.is_duplicate)
+    d_valid = xgb.DMatrix(valid_features.drop(['is_duplicate'], axis=1),
+                          label=valid_features.is_duplicate)
 
     params = {}
     params['objective'] = 'binary:logistic'
     params['eval_metric'] = 'logloss'
     params['eta'] = 0.02
-    params['max_depth'] = 20
+    params['max_depth'] = 10
     params["subsample"] = 0.7
-    params["min_child_weight"] = 3
+    params["min_child_weight"] = 2
     params["colsample_bytree"] = 0.7
     params["silent"] = 1
     params["seed"] = 1632
 
-    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'valid')], early_stopping_rounds=50, verbose_eval=10)
+    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'cross-validation')], early_stopping_rounds=50, verbose_eval=10)
 
     # making predictions
     print('loading testing data...')
-    test_data = pd.read_csv(TEST_DATA, header=None)
-    test_data = test_data.as_matrix()
-    print('{0} testing data loaded'.format(test_data.shape))
+    test_features = pd.read_csv(TEST_FEATURES)
+    test_features = test_features.fillna(.0)
+    d_test = xgb.DMatrix(test_features)
 
     print('making predictions...')
-    d_test = xgb.DMatrix(test_data)
     p_test = bst.predict(d_test)
 
     print('writing predictions...')
-    sub = pd.DataFrame()
-    sub['test_id'] = range(0, p_test.shape[0])
-    sub['is_duplicate'] = p_test
-    sub = sub.fillna(0.1742452565)
-    sub.to_csv(SUBMISSION_FILE, index=False)
+    predictions = pd.DataFrame()
+    predictions['test_id'] = range(0, p_test.shape[0])
+    predictions['is_duplicate'] = p_test
+    predictions = predictions.fillna(POS_PROP)
+    predictions.to_csv(SUBMISSION_FILE, index=False)
 
 if __name__ == '__main__':
     main()

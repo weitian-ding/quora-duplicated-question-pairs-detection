@@ -48,5 +48,5 @@ if __name__ == '__main__':
 
     # write preprocessed data
     print('writing...')
-    train_data.to_csv(TRAIN_PRE, index=False)
-    # test_data.to_csv(TEST_PRE, index=False)
+    #train_data.to_csv(TRAIN_PRE, index=False)
+    test_data.to_csv(TEST_PRE, index=False)

@@ -2,11 +2,11 @@ import pandas as pd
 from gensim.models import KeyedVectors
 from sklearn.metrics import roc_auc_score
 
-TRAIN_DATA = 'data/train_balanced.csv'
-TEST_DATA =  'data/test.csv'
+TRAIN_DATA = 'input/train.csv'
+TEST_DATA =  'input/test.csv'
 
-TRAIN_FEATURE = 'features/features_wm_train.csv'
-TEST_FEATURE = 'features/features_wm_test.csv'
+TRAIN_FEATURE = 'features/wm_train.csv'
+TEST_FEATURE = 'features/wm_test.csv'
 
 MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 
@@ -24,7 +24,7 @@ def main():
         print('embedding training data...')
         train = pd.read_csv(TRAIN_DATA)
         train_features = extract_features(train)
-        train_features.to_csv(TRAIN_FEATURE, index=False, header=False)
+        train_features.to_csv(TRAIN_FEATURE, index=False)
         print(train_features.head())
 
         '''
@@ -39,7 +39,7 @@ def main():
         print('embedding testing data...')
         test = pd.read_csv(TEST_DATA)
         test_features = extract_features(test)
-        test_features.to_csv(TEST_FEATURE, index=False, header=False)
+        test_features.to_csv(TEST_FEATURE, index=False)
 
 
 if __name__ == '__main__':

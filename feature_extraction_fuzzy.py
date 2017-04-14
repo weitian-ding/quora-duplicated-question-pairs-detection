@@ -3,11 +3,11 @@ import pandas as pd
 from fuzzywuzzy import fuzz
 from sklearn.metrics import roc_auc_score
 
-TRAIN_FILE = "data/train_balanced.csv"
-TEST_FILE =  "data/test.csv"
+TRAIN_FILE = "input/train.csv"
+TEST_FILE =  "input/test.csv"
 
-TRAIN_OUTPUT_FILE = "features/features_fuzz_train.csv"
-TEST_OUTPUT_FILE = "features/features_fuzz_test.csv"
+TRAIN_OUTPUT_FILE = "features/fuzz_train.csv"
+TEST_OUTPUT_FILE = "features/fuzz_test.csv"
 
 def extract_features(df):
     features = pd.DataFrame()
@@ -34,7 +34,7 @@ def main():
         print('fuzz_partial_token_set_ratio AUC:', roc_auc_score(dataframe['is_duplicate'], features['fuzz_partial_token_set_ratio']))
         print('fuzz_partial_token_sort_ratio AUC:', roc_auc_score(dataframe['is_duplicate'], features['fuzz_partial_token_sort_ratio']))
 
-        features.to_csv(TRAIN_OUTPUT_FILE, header=False, index=False)
+        features.to_csv(TRAIN_OUTPUT_FILE, index=False)
 
     if TEST_FILE != "":
         print('loading testing data...')
@@ -44,7 +44,7 @@ def main():
         print('embedding testing data...')
         features = extract_features(dataframe)
 
-        features.to_csv(TEST_OUTPUT_FILE, header=False, index=False)
+        features.to_csv(TEST_OUTPUT_FILE, index=False)
 
 
 if __name__ == '__main__':

@@ -1,12 +1,15 @@
 import difflib
+import string
 
 import pandas as pd
-from nltk import word_tokenize, pos_tag, PorterStemmer
+from nltk import pos_tag, PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.metrics import roc_auc_score
 
-TRAIN_FILE = 'data/train_cleaned.csv'
-TEST_FILE = 'data/test_cleaned.csv'
+from clean_data import clean_txt
+
+TRAIN_FILE = 'input/train.csv'
+TEST_FILE = 'input/test.csv' #''data/test_cleaned.csv'
 
 TRAIN_OUTPUT_FILE = "features/basic_train.csv"
 TEST_OUTPUT_FILE = "features/basic_test.csv"
@@ -14,6 +17,8 @@ TEST_OUTPUT_FILE = "features/basic_test.csv"
 seq = difflib.SequenceMatcher()
 stops = stopwords.words('english')
 stemmer = PorterStemmer()
+punct_map = str.maketrans('', '', string.punctuation)
+
 
 def seq_ratio(st1, st2):
     seq.set_seqs(st1.lower(), st2.lower())
@@ -32,11 +37,10 @@ def word_share(words1, words2):
 
 
 def tokenize(txt):
-    tokens = word_tokenize(str(txt).lower())
-    try:
-        tokens = [stemmer.stem(w) for w in tokens if w not in stops]
-    except IndexError:
-        tokens = [w for w in tokens if w not in stops]
+    #tokens = word_tokenize(str(txt).lower())
+    #tokens = [w for w in tokens if w not in stops]
+    tokens = str(txt).lower().split()
+    tokens = [w for w in tokens if w not in stops]
     return tokens
 
 
@@ -71,8 +75,8 @@ def extract_features(df):
     print('extracting match ratios...')
 
     features['word_match'] = df.apply(lambda r: word_share(r.q1_words, r.q2_words), axis=1)
-    features['diff_seq_ratio'] = df.apply(lambda r: seq_ratio(str(r.question1), str(r.question2)), axis=1)
-    features['len_match'] = features.abs_str_diff_len / (features.q1_str_len + features.q2_str_len)
+    features['diff_seq_ratio'] = df.apply(lambda r: seq_ratio(clean_txt(r.question1), clean_txt(r.question2)), axis=1)
+    #features['len_match'] = features.abs_str_diff_len / (features.q1_str_len + features.q2_str_len)
     features['noun_match'] = df.apply(lambda r: word_share(r.q1_nouns, r.q2_nouns), axis=1)
 
     return features.fillna(.0)
@@ -90,7 +94,7 @@ if __name__ == "__main__":
         print('word_match accuracy:', roc_auc_score(df['is_duplicate'], features['word_match']))
         print('noun_match accuracy:', roc_auc_score(df['is_duplicate'], features['noun_match']))
         print('diff_seq_ratio accuracy:', roc_auc_score(df['is_duplicate'], features['diff_seq_ratio']))
-        print('len_match accuracy:', 1 - roc_auc_score(df['is_duplicate'], features['len_match']))
+        # print('len_match accuracy:', 1 - roc_auc_score(df['is_duplicate'], features['len_match']))
 
         features.to_csv(TRAIN_OUTPUT_FILE, index=False)
 
