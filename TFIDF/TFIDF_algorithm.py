@@ -88,7 +88,7 @@ originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
 print ('Reducing dimensions...')
-svd = TruncatedSVD(n_components=1000)
+svd = TruncatedSVD(n_components=500)
 svd.fit(originals)
 originals = svd.transform(originals)
 
