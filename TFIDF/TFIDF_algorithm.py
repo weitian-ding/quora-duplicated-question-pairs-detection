@@ -87,6 +87,7 @@ tfidf.fit(originals) # This is the slow part!
 originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
+print ('Reducing dimensions...')
 svd = TruncatedSVD(n_components=1000)
 svd.fit(originals)
 originals = svd.transform(originals)
