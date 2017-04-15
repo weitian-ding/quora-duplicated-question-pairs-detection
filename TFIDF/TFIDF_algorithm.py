@@ -28,7 +28,7 @@ with open('train_balanced.csv', 'rb') as csvfile:
     writer = csv.reader(csvfile)
     train_sentences = list(writer)
 # OPEN TESTING DATA SET
-with open('test_dataset.csv', 'rb') as csvfile:
+with open('test.csv', 'rb') as csvfile:
     writer = csv.reader(csvfile)
     test_sentences = list(writer)
 
