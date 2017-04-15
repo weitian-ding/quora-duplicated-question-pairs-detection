@@ -17,4 +17,4 @@ sudo -H pip3 install python-Levenshtein
 
 sudo python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
-wget https://s3.amazonaws.com/mordecai-geo/GoogleNews-vectors-negative300.bin.gz
+#wget https://s3.amazonaws.com/mordecai-geo/GoogleNews-vectors-negative300.bin.gz
