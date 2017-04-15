@@ -1,10 +1,6 @@
 import datetime
-import imp
-import importlib
-
 import pandas as pd
 import xgboost as xgb
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 TRAIN_DATA = 'input/train.csv'
@@ -14,29 +10,6 @@ TEST_FEATURES = "features/test.csv"
 SUBMISSION_FILE = 'data/submission.csv'
 
 POS_PROP = 0.1742452565
-
-
-def rebalance(labelled_features):
-    pos_samples = labelled_features[labelled_features['is_duplicate'] == 1]
-    neg_samples = labelled_features[labelled_features['is_duplicate'] == 0]
-
-    needed = int(len(pos_samples) / POS_PROP - len(pos_samples))
-    multiplier = needed // len(neg_samples)
-    remainder = needed % len(neg_samples)
-
-    balanced = pd.concat([neg_samples] * multiplier + [neg_samples[:remainder], pos_samples], ignore_index=True)
-
-    return balanced
-
-
-def rebalance2(labelled_features):
-    pos_samples = labelled_features[labelled_features['is_duplicate'] == 1]
-    neg_samples = labelled_features[labelled_features['is_duplicate'] == 0]
-
-    pos_count = int(len(neg_samples) / (1 - POS_PROP) - len(neg_samples))
-    balanced = pd.concat([neg_samples, pos_samples[:pos_count]], ignore_index=True)
-
-    return balanced
 
 
 def train_test_split_rebalance(features):
@@ -78,14 +51,7 @@ def main():
     #print('word_match accuracy:', roc_auc_score(train_features['is_duplicate'], train_features['word_match']))
 
     print('rebalancing and creating cross-validation set...')
-    # train_features,valid_features = train_test_split(train_features, test_size=0.2, random_state=4242)
     train_features, valid_features = train_test_split_rebalance(train_features)
-
-    '''
-    print('rebalance data...')
-    train_features = rebalance(train_features)
-    valid_features = rebalance2(valid_features)
-    '''
 
     print('label mean in training set is {0}'.format(train_features.is_duplicate.mean()))
     print('label mean in cross-validation set is {0}'.format(valid_features.is_duplicate.mean()))
@@ -115,15 +81,15 @@ def main():
     bst.save_model('bst-{0}.model'.format(timestamp))
 
     # plots
-    try:
+    #try:
         #imp.find_module('matplotlib')
         #imp.find_module('graphviz')
-        print('drawing plots...')
-        xgb.plot_tree(bst, num_trees=1)
-        xgb.plot_importance(bst)
+    print('drawing plots...')
+    xgb.plot_tree(bst, num_trees=1)
+    xgb.plot_importance(bst)
 
-    except ImportError:
-        print('cannot plot, matplotlib or graphviz is not installed.')
+    #except ImportError:
+     #   print('cannot plot, matplotlib or graphviz is not installed.')
 
     # making predictions
     print('loading testing data...')
