@@ -8,11 +8,11 @@ from nltk.corpus import stopwords
 from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
 
-TRAIN_DATA = 'data/train_balanced.csv'
-TEST_DATA =  'data/test.csv'
+TRAIN_DATA = 'input/train.csv'
+TEST_DATA =  'test/test.csv'
 
-TRAIN_FEATURE = 'features/features_norm_w2v_train.csv'
-TEST_FEATURE = 'features/features_norm_w2v_test.csv'
+TRAIN_FEATURE = 'features/w2v_train.csv'
+TEST_FEATURE = 'features/w2v_test.csv'
 
 MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 
@@ -70,13 +70,13 @@ def main():
         print('embedding training data...')
         train = pd.read_csv(TRAIN_DATA)
         train_features = extract_features(train)
-        train_features.to_csv(TRAIN_FEATURE, index=False, header=False)
+        train_features.to_csv(TRAIN_FEATURE, index=False)
 
     if TEST_DATA != '':
         print('embedding testing data...')
         test = pd.read_csv(TEST_DATA)
         test_features = extract_features(test)
-        test_features.to_csv(TEST_FEATURE, index=False, header=False)
+        test_features.to_csv(TEST_FEATURE, index=False)
 
 
 if __name__ == '__main__':
