@@ -14,7 +14,9 @@ sudo -H pip3 install pandas
 
 sudo -H pip3 install fuzzywuzzy
 sudo -H pip3 install python-Levenshtein
+sudo -H pip3 install numpy
+sudo apt-get install python3-tk
 
-sudo python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
+sudo python3 -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
-#wget https://s3.amazonaws.com/mordecai-geo/GoogleNews-vectors-negative300.bin.gz
+sudo echo 'export PYTHONPATH=/data/xgboost/python-package' >> ~/.bashrc
