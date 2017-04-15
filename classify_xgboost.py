@@ -116,8 +116,8 @@ def main():
 
     # plots
     try:
-        imp.find_module('matplotlib')
-        imp.find_module('graphviz')
+        #imp.find_module('matplotlib')
+        #imp.find_module('graphviz')
         print('drawing plots...')
         xgb.plot_tree(bst, num_trees=1)
         xgb.plot_importance(bst)
