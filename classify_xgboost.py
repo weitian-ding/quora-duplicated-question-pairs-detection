@@ -72,11 +72,12 @@ def main():
     params = {'objective': 'binary:logistic',
               'eval_metric': ['logloss', 'error'],
               'eta': 0.02,
+              'num_round': 20,
               'max_depth': 15,
               "subsample": 0.7,
               "min_child_weight": 2,
               "colsample_bytree": 0.7,
-              "silent": 0,
+              "silent": 1,
               "seed": 1632,
               'tree_method': 'exact'
               }
