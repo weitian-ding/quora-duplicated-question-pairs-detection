@@ -35,16 +35,16 @@ with open('test.csv', 'r') as csvfile:
 # OVERALL
 # stops = stopwords.words("english")
 # rdict = {'</span>': '', '<br/>': '', '<br />': ''}
-total_phrases = []  # For shuffling purpose
+# total_phrases = []  # For shuffling purpose
 # FOR TRAINING DATA
 tags = []
 train_originals = []  # For keeping the structure of the sentence
-train_corpus_set_1 = []  # For keeping the order of the text
-train_corpus_set_2 = []
+# train_corpus_set_1 = []  # For keeping the order of the text
+# train_corpus_set_2 = []
 # FOR TESTING DATA
 test_originals = []  # For keeping the structure of the sentence
-test_corpus_set_1 = []  # For keeping the order of the text
-test_corpus_set_2 = []
+# test_corpus_set_1 = []  # For keeping the order of the text
+# test_corpus_set_2 = []
 
 # PROCESS TRAINING DATA
 print ('Processing Training Data...')
@@ -81,32 +81,44 @@ for i in range(1, len(test_sentences)):
 
 # TF-IDF REPRESENTATION
 print ('Generating TF-IDF Representation...')
-tfidf = TV(min_df=3, analyzer='word', strip_accents='unicode', tokenizer=tokenize, use_idf=False)
+tfidf = TV(min_df=2, analyzer='word', strip_accents='unicode', tokenizer=tokenize, use_idf=False)
 originals = train_originals + test_originals
 tfidf.fit(originals) # This is the slow part!
 originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
 print ('Reducing dimensions...')
-svd = TruncatedSVD(n_components=1000)
+svd = TruncatedSVD(n_components=500, n_iter=8)
 svd.fit(originals)
 originals = svd.transform(originals)
+explained_variance = svd.explained_variance_ratio_.sum()
+print ('Explained Variance: ' + str(explained_variance))
 
 # LOGISTIC REGRESSION
 print ('Fitting Logistic Regression...')
 #customWeights = {'0':1, '1':0.873}
 model = LogisticRegression(C=10)
 model.fit(originals[:len(train_originals)], tags)
+score = model.score(originals[:len(train_originals)], tags)
+print ('Accuracy: ' + str(score))
 predictions = model.predict_proba(originals[len(train_originals):])
+predictions_train = model.predict_proba(originals[:len(train_originals)])
 
 # WRITE RESULTS TO CSV
 print ('Writing to CSV...')
-good_proba = predictions[:, 1]
-with open('TFIDF_approach2.csv', 'wb') as csvfile:
+good_predict = predictions[:, 1]
+good_train = predictions_train[:, 1]
+with open('training_fit.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["test_id", "is_duplicate"])
-    for i in range(0, len(good_proba)):
-        writer.writerow([i, good_proba[i]])
+    for i in range(0, len(good_train)):
+        writer.writerow([i, good_train[i]])
+    csvfile.close()
+with open('predictions.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["test_id", "is_duplicate"])
+    for i in range(0, len(good_predict)):
+        writer.writerow([i, good_predict[i]])
     csvfile.close()
 
 print ('COMPLETE')
