@@ -81,14 +81,14 @@ for i in range(1, len(test_sentences)):
 
 # TF-IDF REPRESENTATION
 print ('Generating TF-IDF Representation...')
-tfidf = TV(min_df=3, analyzer='word', strip_accents='unicode', tokenizer=tokenize, use_idf=False)
+tfidf = TV(min_df=2, analyzer='word', strip_accents='unicode', tokenizer=tokenize, use_idf=False)
 originals = train_originals + test_originals
 tfidf.fit(originals) # This is the slow part!
 originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
 print ('Reducing dimensions...')
-svd = TruncatedSVD(n_components=500)
+svd = TruncatedSVD(n_components=100)
 svd.fit(originals)
 originals = svd.transform(originals)
 
