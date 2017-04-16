@@ -78,8 +78,9 @@ def main():
     # saving model
     print('saving bst model...')
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-    bst.save_model('bst-{0}.model'.format(timestamp))
+    bst.save_model('models/bst-{0}.model'.format(timestamp))
 
+    '''
     # plots
     #try:
         #imp.find_module('matplotlib')
@@ -90,6 +91,7 @@ def main():
 
     #except ImportError:
      #   print('cannot plot, matplotlib or graphviz is not installed.')
+    '''
 
     # making predictions
     print('loading testing data...')

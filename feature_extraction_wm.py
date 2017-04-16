@@ -15,7 +15,8 @@ model = KeyedVectors.load_word2vec_format(MODEL, binary=True)
 
 
 def extract_features(df):
-    features = df.apply(lambda r: model.wmdistance(str(r.question1), str(r.question2)), axis=1)
+    features = pd.DataFrame()
+    features['word_mover_dist'] = df.apply(lambda r: model.wmdistance(str(r.question1), str(r.question2)), axis=1)
     return features.fillna(.0)
 
 

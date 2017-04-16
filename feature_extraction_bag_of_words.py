@@ -86,7 +86,7 @@ def main():
     tfidf_model = joblib.load(TFIDF_MODEL_FILE)
     bin_model = joblib.load(BIN_MODEL_FILE)  # binary bag of word representation
 
-    assert tokenize('') == [] # check whether tokenize is imported
+    # assert tokenize('') == [] # check whether tokenize is imported
 
     if TRAIN_FILE != "":
         print('embedding training data...')
