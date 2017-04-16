@@ -97,12 +97,14 @@ print ('Fitting Logistic Regression...')
 #customWeights = {'0':1, '1':0.873}
 model = LogisticRegression(C=10)
 model.fit(originals[:len(train_originals)], tags)
+score = model.score(originals[:len(train_originals)], tags)
+print ('Accuracy: ' + str(score))
 predictions = model.predict_proba(originals[len(train_originals):])
 
 # WRITE RESULTS TO CSV
 print ('Writing to CSV...')
 good_proba = predictions[:, 1]
-with open('TFIDF_approach2.csv', 'w') as csvfile:
+with open('TFIDF_approach.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["test_id", "is_duplicate"])
     for i in range(0, len(good_proba)):
