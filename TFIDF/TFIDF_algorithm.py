@@ -88,7 +88,7 @@ originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
 print ('Reducing dimensions...')
-svd = TruncatedSVD(n_components=800, n_iter=8)
+svd = TruncatedSVD(n_components=500, n_iter=8)
 svd.fit(originals)
 originals = svd.transform(originals)
 explained_variance = svd.explained_variance_ratio_.sum()
