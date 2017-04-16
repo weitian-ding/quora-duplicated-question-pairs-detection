@@ -70,14 +70,15 @@ def main():
                           label=train_cv_features.is_duplicate)
 
     params = {'objective': 'binary:logistic',
-              'eval_metric': 'logloss',
+              'eval_metric': ['logloss', 'error'],
               'eta': 0.02,
               'max_depth': 15,
               "subsample": 0.7,
               "min_child_weight": 2,
               "colsample_bytree": 0.7,
               "silent": 1,
-              "seed": 1632
+              "seed": 1632,
+              'tree_method': 'exact'
               }
 
     bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'cross-validation')],
