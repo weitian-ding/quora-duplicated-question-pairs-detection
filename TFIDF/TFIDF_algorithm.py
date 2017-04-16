@@ -35,16 +35,16 @@ with open('test.csv', 'r') as csvfile:
 # OVERALL
 # stops = stopwords.words("english")
 # rdict = {'</span>': '', '<br/>': '', '<br />': ''}
-total_phrases = []  # For shuffling purpose
+# total_phrases = []  # For shuffling purpose
 # FOR TRAINING DATA
 tags = []
 train_originals = []  # For keeping the structure of the sentence
-train_corpus_set_1 = []  # For keeping the order of the text
-train_corpus_set_2 = []
+# train_corpus_set_1 = []  # For keeping the order of the text
+# train_corpus_set_2 = []
 # FOR TESTING DATA
 test_originals = []  # For keeping the structure of the sentence
-test_corpus_set_1 = []  # For keeping the order of the text
-test_corpus_set_2 = []
+# test_corpus_set_1 = []  # For keeping the order of the text
+# test_corpus_set_2 = []
 
 # PROCESS TRAINING DATA
 print ('Processing Training Data...')
