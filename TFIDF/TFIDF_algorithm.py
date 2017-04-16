@@ -100,15 +100,23 @@ model.fit(originals[:len(train_originals)], tags)
 score = model.score(originals[:len(train_originals)], tags)
 print ('Accuracy: ' + str(score))
 predictions = model.predict_proba(originals[len(train_originals):])
+predictions_train = model.predict_proba(originals[:len(train_originals)])
 
 # WRITE RESULTS TO CSV
 print ('Writing to CSV...')
-good_proba = predictions[:, 1]
-with open('TFIDF_approach.csv', 'w') as csvfile:
+good_predict = predictions[:, 1]
+good_train = predictions_train[:, 1]
+with open('training_fit.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["test_id", "is_duplicate"])
-    for i in range(0, len(good_proba)):
-        writer.writerow([i, good_proba[i]])
+    for i in range(0, len(good_train)):
+        writer.writerow([i, good_train[i]])
+    csvfile.close()
+with open('predictions.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["test_id", "is_duplicate"])
+    for i in range(0, len(good_predict)):
+        writer.writerow([i, good_predict[i]])
     csvfile.close()
 
 print ('COMPLETE')
