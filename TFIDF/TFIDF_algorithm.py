@@ -88,9 +88,11 @@ originals = tfidf.transform(originals)
 
 # DIMENSIONALITY REDUCTION - SVD
 print ('Reducing dimensions...')
-svd = TruncatedSVD(n_components=100)
+svd = TruncatedSVD(n_components=100, n_iter=8)
 svd.fit(originals)
 originals = svd.transform(originals)
+explained_variance = svd.explained_variance_ratio_.sum()
+print ('Explained Variance: ' + str(explained_variance))
 
 # LOGISTIC REGRESSION
 print ('Fitting Logistic Regression...')
