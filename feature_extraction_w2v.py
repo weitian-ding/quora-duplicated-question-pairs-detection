@@ -9,7 +9,7 @@ from scipy.spatial.distance import *
 from scipy.stats import skew, kurtosis
 
 TRAIN_DATA = 'input/train.csv'
-TEST_DATA =  'test/test.csv'
+TEST_DATA =  'input/test.csv'
 
 TRAIN_FEATURE = 'features/w2v_train.csv'
 TEST_FEATURE = 'features/w2v_test.csv'
