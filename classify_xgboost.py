@@ -11,7 +11,7 @@ TEST_FEATURES = "features/test.csv"
 TRAIN_PREDICTION = 'data/train_pred_bst.csv'
 SUBMISSION_FILE = 'data/test_pred.csv'
 
-POS_PROP = 0.1742452565
+POS_PROP = 0.165
 
 
 def train_test_split_rebalance(features):
