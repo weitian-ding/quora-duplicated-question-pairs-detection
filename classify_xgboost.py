@@ -70,9 +70,9 @@ def main():
                           label=train_cv_features.is_duplicate)
 
     params = {'objective': 'binary:logistic',
-              'eval_metric': ['logloss', 'error'],
+              'eval_metric': ['logloss'],
               'eta': 0.02,
-              'max_depth': 15,
+              'max_depth': 10,
               "subsample": 0.7,
               "min_child_weight": 2,
               "colsample_bytree": 0.7,
@@ -87,7 +87,7 @@ def main():
     # saving model
     print('saving bst model...')
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-    bst.save_model('models/bst-{0}.model'.format(timestamp))
+    bst.dump_model('models/bst-{0}.model'.format(timestamp), 'models/bst-{0}.feat'.format(timestamp))
 
     '''
     # plots
