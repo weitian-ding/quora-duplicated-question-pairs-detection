@@ -71,7 +71,7 @@ def main():
 
     params = {'objective': 'binary:logistic',
               'eval_metric': ['logloss'],
-              'eta': 0.02,
+              'eta': 0.1,
               'max_depth': 10,
               "subsample": 0.7,
               "min_child_weight": 2,
