@@ -71,10 +71,10 @@ def main():
 
     params = {'objective': 'binary:logistic',
               'eval_metric': ['logloss'],
-              'eta': 0.1,
-              'max_depth': 10,
+              'eta': 0.02,
+              'max_depth': 8,
               "subsample": 0.7,
-              "min_child_weight": 2,
+              "min_child_weight": 1,
               "colsample_bytree": 0.7,
               "silent": 1,
               "seed": 1632,
