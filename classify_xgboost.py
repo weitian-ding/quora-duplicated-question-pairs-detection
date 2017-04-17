@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 import xgboost as xgb
+from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
 
 TRAIN_DATA = 'input/train.csv'
@@ -81,26 +82,13 @@ def main():
               'tree_method': 'exact'
               }
 
-    bst = xgb.train(params, d_train, 2000, [(d_train, 'train'), (d_valid, 'cross-validation')],
+    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'cross-validation')],
                     early_stopping_rounds=50, verbose_eval=10)
 
     # saving model
     print('saving bst model...')
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-    bst.dump_model('models/bst-{0}.model'.format(timestamp))
-
-    '''
-    # plots
-    #try:
-        #imp.find_module('matplotlib')
-        #imp.find_module('graphviz')
-    print('drawing plots...')
-    xgb.plot_tree(bst, num_trees=1)
-    xgb.plot_importance(bst)
-
-    #except ImportError:
-     #   print('cannot plot, matplotlib or graphviz is not installed.')
-    '''
+    joblib.dump(bst, 'models/bst-{0}.model'.format(timestamp))
 
     # making predictions
     print('predicting training data...')
