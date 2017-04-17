@@ -87,7 +87,7 @@ def main():
     # saving model
     print('saving bst model...')
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-    bst.dump_model('models/bst-{0}.model'.format(timestamp), 'models/bst-{0}.feat'.format(timestamp))
+    bst.dump_model('models/bst-{0}.model'.format(timestamp))
 
     '''
     # plots
