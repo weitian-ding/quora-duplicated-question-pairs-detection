@@ -72,7 +72,6 @@ def main():
     params = {'objective': 'binary:logistic',
               'eval_metric': ['logloss', 'error'],
               'eta': 0.02,
-              'num_round': 20,
               'max_depth': 15,
               "subsample": 0.7,
               "min_child_weight": 2,
@@ -82,7 +81,7 @@ def main():
               'tree_method': 'exact'
               }
 
-    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'cross-validation')],
+    bst = xgb.train(params, d_train, 1000, [(d_train, 'train'), (d_valid, 'cross-validation')],
                     early_stopping_rounds=50, verbose_eval=10)
 
     # saving model
