@@ -51,7 +51,7 @@ def main():
     print(combined.head())
 
     print('fitting tf_idf vectorizer...')
-    features = vectorizer.fit_transform(combined[0])
+    features = vectorizer.fit_transform(combined)
     f_train = features[0:len(train_data.qpair)]
     f_test = features[len(test_data.qpair):]
 
