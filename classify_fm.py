@@ -43,18 +43,15 @@ def main():
 
     print('loading data...')
     train_data = pd.read_csv(TRAIN_FILE)
-    train_data = train_data.fillna('na')
     test_data = pd.read_csv(TEST_FILE)
-    test_data = test_data.fillna('na')
     train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
     test_data['qpair'] = test_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
-    # concac = pd.DataFrame()
-    concac = pd.concat([train_data['qpair'], test_data['qpair']], axis=1, ignore_index=True)
-    concac = concac.fillna('na')
-    print(concac.head())
+    combined = pd.concat([train_data['qpair'], test_data['qpair']], axis=1, ignore_index=True)
+    combined = combined.fillna('na')
+    print(combined.head())
 
     print('fitting tf_idf vectorizer...')
-    features = vectorizer.fit_transform(concac)
+    features = vectorizer.fit_transform(combined[0])
     f_train = features[0:len(train_data.qpair)]
     f_test = features[len(test_data.qpair):]
 
