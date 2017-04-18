@@ -46,7 +46,7 @@ def main():
     test_data = pd.read_csv(TEST_FILE)
     train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
     test_data['qpair'] = test_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
-    combined = pd.concat([train_data['qpair'], test_data['qpair']], axis=1, ignore_index=True)
+    combined = pd.concat([train_data['qpair'], test_data['qpair']], axis=0, ignore_index=True)
     combined = combined.fillna('na')
     print(combined.head())
 
