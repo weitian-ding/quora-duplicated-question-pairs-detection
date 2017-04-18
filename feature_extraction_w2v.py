@@ -46,16 +46,16 @@ def pair2vec(str1, str2):
     vec1 = avg_w2v(str1)
     vec2 = avg_w2v(str2)
     features = pd.Series({
-        'euclidean': euclidean(vec1, vec2),
-        'manhattan': cityblock(vec1, vec2),
-        'canberra': canberra(vec1, vec2),
-        'braycurtis': braycurtis(vec1, vec2),
-        'skew1': skew(vec1),
-        'skew2': skew(vec2),
-        'kurtosis1': kurtosis(vec1),
-        'kurtosis2': kurtosis(vec2),
-        'wminkowski': wminkowski(vec1, vec2, 2, np.ones(DIM)),
-        'cosine': cosine(vec1, vec2)
+        'avg_w2v_euclidean': euclidean(vec1, vec2),
+        'avg_w2v_manhattan': cityblock(vec1, vec2),
+        'avg_w2v_canberra': canberra(vec1, vec2),
+        'avg_w2v_braycurtis': braycurtis(vec1, vec2),
+        'avg_w2v_skew1': skew(vec1),
+        'avg_w2v_skew2': skew(vec2),
+        'avg_w2v_kurtosis1': kurtosis(vec1),
+        'avg_w2v_kurtosis2': kurtosis(vec2),
+        'avg_w2v_wminkowski': wminkowski(vec1, vec2, 2, np.ones(DIM)),
+        'avg_w2v_cosine': cosine(vec1, vec2)
     })
     return features
 
