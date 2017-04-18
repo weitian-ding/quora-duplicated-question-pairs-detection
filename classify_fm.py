@@ -1,5 +1,6 @@
 import pandas as pd
-from fastFM import als
+import scipy.sparse as sp
+from fastFM import als, sgd
 from gensim.parsing import PorterStemmer
 from nltk import word_tokenize
 from sklearn.externals import joblib
@@ -13,7 +14,8 @@ TEST_FILE = 'input/test.csv'
 MODEL_TFIDF_FILE = 'models/bow_tfidf.pkl'
 MODEL_BIN_FILE = 'models/bow_bin.pkl'
 
-
+POS_PROP = 0.165
+SUBMISSION_FILE = 'data/test_pred.csv'
 
 def tokenize(txt):
     return str(txt).lower().split()
@@ -27,7 +29,7 @@ def build_vectorizer(binary):
                             min_df=2,
                             ngram_range=(1, 1),
                             stop_words='english',
-                            #tokenizer=tokenize,
+                            tokenizer=tokenize,
                             sublinear_tf=False,
                             use_idf=use_idf,
                             norm=norm,
@@ -39,29 +41,40 @@ def main():
 
     vectorizer = build_vectorizer(binary=False)
 
-    features = pd.DataFrame()
-
+    print('loading data...')
     train_data = pd.read_csv(TRAIN_FILE)
-
-    conc_question = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
+    train_data = train_data.fillna('na')
+    test_data = pd.read_csv(TEST_FILE)
+    test_data = test_data.fillna('na')
+    train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
+    test_data['qpair'] = test_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
+    # concac = pd.DataFrame()
+    concac = pd.concat([train_data['qpair'], test_data['qpair']], axis=1, ignore_index=True)
+    concac = concac.fillna('na')
+    print(concac.head())
 
     print('fitting tf_idf vectorizer...')
-    X_train = vectorizer.fit_transform(conc_question)
-    y_train = train_data.is_duplicate
+    features = vectorizer.fit_transform(concac.qpair)
+    f_train = features[0:len(qpairs_train)]
+    f_test = features[len(qpairs_train):]
 
-    X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.33, random_state=1234)
-
-    #features['q1_bow'] = list(bow)[0:len(train_data.question1)]
-    #features['q2_bow'] = list(bow)[len(train_data.question1):]
+    X_train, X_cv, y_train, y_cv = train_test_split(f_train, train_data.is_duplicate, test_size=0.2, random_state=1234)
 
     print('training FM model...')
     fm = als.FMRegression(n_iter=1000, init_stdev=0.1, rank=2, l2_reg_w=0.1, l2_reg_V=0.5)
     fm.fit(X_train, y_train)
 
-    print('cross validation')
-    predictions = fm.predict(X_test)
+    print('cross validation...')
+    predictions = fm.predict(X_cv)
+    print('cv accuracy: {0}'.format(roc_auc_score(y_cv, predictions)))
 
-    print('cv accuracy: {0}'.format(roc_auc_score(y_test, predictions)))
+    print('predicting...')
+    predictions = pd.DataFrame()
+    predictions['test_id'] = range(0, test_data.shape[0])
+    predictions['is_duplicate'] = fm.predict(f_test)
+    predictions = predictions.fillna(POS_PROP)
+    predictions.to_csv(SUBMISSION_FILE, index=False)
+
 
 if __name__ == '__main__':
     main()
