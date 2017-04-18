@@ -54,9 +54,9 @@ def main():
     print(concac.head())
 
     print('fitting tf_idf vectorizer...')
-    features = vectorizer.fit_transform(concac.qpair)
-    f_train = features[0:len(qpairs_train)]
-    f_test = features[len(qpairs_train):]
+    features = vectorizer.fit_transform(concac)
+    f_train = features[0:len(train_data.qpair)]
+    f_test = features[len(test_data.qpair):]
 
     X_train, X_cv, y_train, y_cv = train_test_split(f_train, train_data.is_duplicate, test_size=0.2, random_state=1234)
 
