@@ -5,6 +5,7 @@ from gensim.parsing import PorterStemmer
 from nltk import word_tokenize
 from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import log_loss
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
@@ -29,7 +30,7 @@ def build_vectorizer(binary):
                             min_df=2,
                             ngram_range=(1, 1),
                             stop_words='english',
-                            #tokenizer=tokenize,
+                            tokenizer=tokenize,
                             sublinear_tf=False,
                             use_idf=use_idf,
                             norm=norm,
@@ -53,7 +54,7 @@ def main():
     print('fitting tf_idf vectorizer...')
     features = vectorizer.fit_transform(combined)
     f_train = features[0:len(train_data.qpair)]
-    f_test = features[len(test_data.qpair):]
+    f_test = features[len(train_data.qpair):]
 
     X_train, X_cv, y_train, y_cv = train_test_split(f_train, train_data.is_duplicate, test_size=0.2, random_state=1234)
 
@@ -63,11 +64,11 @@ def main():
 
     print('cross validation...')
     predictions = fm.predict(X_cv)
-    print('cv accuracy: {0}'.format(roc_auc_score(y_cv, predictions)))
+    print('cv accuracy: {0}'.format(log_loss(y_cv, predictions)))
 
-    print('predicting...')
+    print('predicting {0} test data...'.format(f_test.shape[0]))
     predictions = pd.DataFrame()
-    predictions['test_id'] = range(0, test_data.shape[0])
+    predictions['test_id'] = range(0, f_test.shape[0])
     predictions['is_duplicate'] = fm.predict(f_test)
     predictions = predictions.fillna(POS_PROP)
     predictions.to_csv(SUBMISSION_FILE, index=False)
