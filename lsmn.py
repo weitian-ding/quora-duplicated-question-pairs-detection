@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
@@ -17,9 +19,7 @@ MODEL_FILE = 'models/lstm-{0}'
 
 W2V_DIM = 300
 MAX_SEQ_LEN = 40
-
 MAX_VOCAB_SIZE = 200000
-
 LSTM_UNITS = 225
 DENSE_UNITS = 125
 LSTM_DROPOUT = 0.25
@@ -112,7 +112,8 @@ def main():
                    metrics=['accuracy'])
 
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
-    model_checkpoint = ModelCheckpoint(MODEL_FILE,
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+    model_checkpoint = ModelCheckpoint(MODEL_FILE.format(timestamp),
                                        save_best_only=True,
                                        save_weights_only=True)
 
@@ -127,7 +128,7 @@ def main():
 
     merged.load_weights(MODEL_FILE)
     bst_val_score = min(hist.history['val_loss'])
-    print('min cv loss {0}'.format(bst_val_score))
+    print('min cv log-loss {0}'.format(bst_val_score))
 
     # predict
     print('predicting...')
