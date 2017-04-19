@@ -54,7 +54,7 @@ def main():
 
     seq1_train = texts_to_padded_seq(train_data.question1.tolist(), tk)
     seq2_train = texts_to_padded_seq(train_data.question2.tolist(), tk)
-    y_train = train_data.is_duplicate
+    y_train = train_data.is_duplicate.reshape(1, -1) # column vector
 
     seq1_train_stacked = np.vstack((seq1_train, seq2_train))
     seq2_train_stacked = np.vstack((seq2_train, seq1_train))
