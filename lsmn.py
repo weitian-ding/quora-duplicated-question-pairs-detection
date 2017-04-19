@@ -117,7 +117,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = w2v_model.fit([seq1_train_stacked, seq2_train_stacked],
+    hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
               y=y_train_stacked,
               validation_split=0.1,
               epochs=200,
@@ -126,7 +126,7 @@ def main():
               shuffle=True,
               callbacks=[early_stopping, model_checkpoint])
 
-    w2v_model.load_weights(MODEL_FILE)
+    merged.load_weights(MODEL_FILE)
     bst_val_score = min(hist.history['val_loss'])
     print('min cv loss {0}'.format(bst_val_score))
 
