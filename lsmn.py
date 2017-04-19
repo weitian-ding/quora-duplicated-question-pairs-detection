@@ -37,7 +37,7 @@ def texts_to_padded_seq(texts, tk):
 def main():
 
     print('loading GoogleNews-Vectors-negative300.bin...')
-    model = KeyedVectors.load_word2vec_format(MODEL, binary=True)
+    w2v_model = KeyedVectors.load_word2vec_format(MODEL, binary=True)
 
     # load data
     print('loading data...')
@@ -69,8 +69,8 @@ def main():
     vocab_size = len(tk.word_index) + 1
     w2v_weights = np.zeros((vocab_size, W2V_DIM))
     for word, i in tk.word_index.items():
-        if word in model.vocab:
-            w2v_weights[i] = model.word_vec(word)
+        if word in w2v_model.vocab:
+            w2v_weights[i] = w2v_model.word_vec(word)
 
     # model
     print('building model...')
@@ -117,7 +117,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = model.fit([seq1_train_stacked, seq2_train_stacked],
+    hist = w2v_model.fit([seq1_train_stacked, seq2_train_stacked],
               y=y_train_stacked,
               validation_split=0.1,
               epochs=200,
@@ -126,14 +126,14 @@ def main():
               shuffle=True,
               callbacks=[early_stopping, model_checkpoint])
 
-    model.load_weights(MODEL_FILE)
+    w2v_model.load_weights(MODEL_FILE)
     bst_val_score = min(hist.history['val_loss'])
     print('min cv loss {0}'.format(bst_val_score))
 
     # predict
     print('predicting...')
-    preds = model.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
-    preds += model.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
     submission = pd.DataFrame({'test_id': range(0, preds.shape[0]),
