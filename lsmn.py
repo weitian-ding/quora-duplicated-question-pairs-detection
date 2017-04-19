@@ -70,6 +70,7 @@ def main():
     for word, i in tk.word_index.items():
         if word in w2v_model.vocab:
             w2v_weights[i] = w2v_model.word_vec(word)
+    print('w2v weight matrix dim {0}'.format(w2v_weights.shape))
 
     # model
     print('building model...')
