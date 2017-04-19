@@ -30,7 +30,7 @@ def build_vectorizer(binary):
                             min_df=2,
                             ngram_range=(1, 1),
                             stop_words='english',
-                            tokenizer=tokenize,
+                            #tokenizer=tokenize,
                             sublinear_tf=False,
                             use_idf=use_idf,
                             norm=norm,
@@ -45,28 +45,39 @@ def main():
     print('loading data...')
     train_data = pd.read_csv(TRAIN_FILE)
     test_data = pd.read_csv(TEST_FILE)
-    train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
-    test_data['qpair'] = test_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
-    combined = pd.concat([train_data['qpair'], test_data['qpair']], axis=0, ignore_index=True)
+    #train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
+    #test_data['qpair'] = test_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)
+    combined = pd.concat([train_data.question1, train_data.question2, test_data.question1, test_data.question2],
+                         axis=0, ignore_index=True)
     combined = combined.fillna('na')
     print(combined.head())
 
     print('fitting tf_idf vectorizer...')
     features = vectorizer.fit_transform(combined)
-    f_train = features[0:len(train_data.qpair)]
-    f_test = features[len(train_data.qpair):]
+    train_size = len(train_data.question1)
+    test_size = len(test_data.question1)
+    f_train_q1 = features[0:train_size]
+    f_train_q2 = features[train_size:train_size * 2]
+    f_test_q1 = features[train_size * 2:train_size * 2 + test_size]
+    f_test_q2 = features[train_size * 2 + test_size:]
+
+    f_train = sp.hstack([f_train_q1,
+                         f_train_q2])
+    f_test = sp.hstack([f_test_q1,
+                        f_test_q2])
 
     X_train, X_cv, y_train, y_cv = train_test_split(f_train, train_data.is_duplicate, test_size=0.2, random_state=1234)
 
     print('training FM model...')
-    fm = als.FMRegression(n_iter=1000, init_stdev=0.1, rank=2, l2_reg_w=0.1, l2_reg_V=0.5)
+    fm = als.FMRegression(n_iter=1000, init_stdev=0.1, rank=4, l2_reg_w=0.1, l2_reg_V=0.5)
     fm.fit(X_train, y_train)
 
     print('cross validation...')
     predictions = fm.predict(X_cv)
-    print('cv accuracy: {0}'.format(log_loss(y_cv, predictions)))
+    print('cv log-loss: {0}'.format(log_loss(y_cv, predictions)))
+    print('cv auc: {0}'.format(roc_auc_score(y_cv, predictions)))
 
-    print('predicting {0} test data...'.format(f_test.shape[0]))
+    print('predicting {0} test samples...'.format(f_test.shape[0]))
     predictions = pd.DataFrame()
     predictions['test_id'] = range(0, f_test.shape[0])
     predictions['is_duplicate'] = fm.predict(f_test)
