@@ -1,16 +1,14 @@
+import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, concatenate
+from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
-from nltk import word_tokenize
-import numpy as np
-from sklearn.model_selection import train_test_split
 
 TRAIN_DATA = 'input/train.csv'
-TEST_DATA =  'input/test.csv'
+TEST_DATA = 'input/test.csv'
 
 SUBMISSION_FILE = 'data/submission.csv'
 
@@ -47,7 +45,7 @@ def main():
     # tokenize
     print('tokenizing questions...')
     tk = Tokenizer(num_words=MAX_VOCAB_SIZE)
-    print(train_data.question1.tolist()[1:10])
+    print(train_data.question1.head())
     tk.fit_on_texts(train_data.question1.tolist()
                     + train_data.question2.tolist()
                     + test_data.question1.tolist()
@@ -61,6 +59,7 @@ def main():
     seq1_train_stacked = np.vstack((seq1_train, seq2_train))
     seq2_train_stacked = np.vstack((seq2_train, seq1_train))
     y_train_stacked = np.vstack((y_train, y_train))
+    print('{0} {1} {2}'.format(seq1_train_stacked.shape, seq2_train_stacked.shape, y_train_stacked.shape))
 
     seq1_test = texts_to_padded_seq(test_data.question1.tolist(), tk)
     seq2_test = texts_to_padded_seq(test_data.question2.tolist(), tk)
@@ -95,7 +94,7 @@ def main():
                     recurrent_dropout=LSTM_DROPOUT))
 
     merged = Sequential()
-    merged.add(Merge([model1, model2], mode='concat'))
+    merged.add(Merge([model1, model2], mode='concat', concat_axis=1))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
