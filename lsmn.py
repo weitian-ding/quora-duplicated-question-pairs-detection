@@ -54,12 +54,12 @@ def main():
 
     seq1_train = texts_to_padded_seq(train_data.question1.tolist(), tk)
     seq2_train = texts_to_padded_seq(train_data.question2.tolist(), tk)
-    y_train = train_data.is_duplicate.reshape(1, -1) # column vector
+    y_train = np.array([train_data.is_duplicate]).T # column vector
 
     seq1_train_stacked = np.vstack((seq1_train, seq2_train))
     seq2_train_stacked = np.vstack((seq2_train, seq1_train))
     y_train_stacked = np.vstack((y_train, y_train))
-    print('{0} {1} {2}'.format(seq1_train_stacked.shape, seq2_train_stacked.shape, y_train_stacked.shape))
+    print('x1_dim={0} x2_dim={1} y_dim={2}'.format(seq1_train_stacked.shape, seq2_train_stacked.shape, y_train_stacked.shape))
 
     seq1_test = texts_to_padded_seq(test_data.question1.tolist(), tk)
     seq2_test = texts_to_padded_seq(test_data.question2.tolist(), tk)
