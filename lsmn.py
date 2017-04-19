@@ -95,8 +95,7 @@ def main():
                     recurrent_dropout=LSTM_DROPOUT))
 
     merged = Sequential()
-
-    merged = merged.add(concatenate([model1, model2]))
+    merged.add(concatenate([model1, model2]))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
