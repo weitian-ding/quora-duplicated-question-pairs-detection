@@ -1,7 +1,7 @@
 import pandas as pd
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense
+from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, concatenate
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
@@ -96,7 +96,7 @@ def main():
 
     merged = Sequential()
 
-    merged.add(Merge([model1, model2]))
+    merged.add(concatenate([model1, model2]))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
