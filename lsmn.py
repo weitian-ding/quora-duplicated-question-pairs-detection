@@ -1,4 +1,5 @@
 import datetime
+import re
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,48 @@ LSTM_UNITS = 225
 DENSE_UNITS = 125
 LSTM_DROPOUT = 0.25
 DENSE_DROPOUT = 0.25
+EPOCH = 5
+
+POS_DISTRIB_IN_TEST = 0.1746
+
+
+def clean_txt(text):
+    text = str(text).lower()
+
+    re.sub(r"[^A-Za-z0-9^,!.\/'+-=]", ' ', text)  # removing non ASCII chars
+
+    # Clean the text
+    text = re.sub(r"[^A-Za-z0-9^,!.\/'+-=]", " ", text)
+    text = re.sub(r"what's", "what is ", text)
+    text = re.sub(r"\'s", " ", text)
+    text = re.sub(r"\'ve", " have ", text)
+    text = re.sub(r"can't", "cannot ", text)
+    text = re.sub(r"n't", " not ", text)
+    text = re.sub(r"i'm", "i am ", text)
+    text = re.sub(r"\'re", " are ", text)
+    text = re.sub(r"\'d", " would ", text)
+    text = re.sub(r"\'ll", " will ", text)
+    text = re.sub(r",", " ", text)
+    text = re.sub(r"\.", " ", text)
+    text = re.sub(r"!", " ! ", text)
+    text = re.sub(r"\/", " ", text)
+    text = re.sub(r"\^", " ^ ", text)
+    text = re.sub(r"\+", " + ", text)
+    text = re.sub(r"\-", " - ", text)
+    text = re.sub(r"\=", " = ", text)
+    text = re.sub(r"'", " ", text)
+    text = re.sub(r"60k", " 60000 ", text)
+    text = re.sub(r":", " : ", text)
+    text = re.sub(r" e g ", " eg ", text)
+    text = re.sub(r" b g ", " bg ", text)
+    text = re.sub(r" u s ", " american ", text)
+    text = re.sub(r'\0s', "0", text)
+    text = re.sub(r" 9 11 ", "911", text)
+    text = re.sub(r"e - mail", "email", text)
+    text = re.sub(r"j k", "jk", text)
+    text = re.sub(r"\s{2,}", " ", text)
+
+    return text
 
 
 def texts_to_padded_seq(texts, tk):
@@ -40,12 +83,22 @@ def main():
     # load data
     print('loading data...')
     train_data = pd.read_csv(TRAIN_DATA).fillna('na')
+    train_data.question1 = train_data.question1.map(clean_txt)
+    train_data.question2 = train_data.question2.map(clean_txt)
+
+    pos_distrib_in_train = train_data.is_duplicate.mean()
+    print('{0}% positives in training data...'.format(pos_distrib_in_train * 100))
+
     test_data = pd.read_csv(TEST_DATA).fillna('na')
+    test_data.question1 = test_data.question1.map(clean_txt)
+    test_data.question2 = test_data.question2.map(clean_txt)
 
     # tokenize
     print('tokenizing questions...')
     tk = Tokenizer(num_words=MAX_VOCAB_SIZE)
-    print(train_data.question1.head())
+    print('sample')
+    print(train_data.question1.head(1000))
+
     tk.fit_on_texts(train_data.question1.tolist()
                     + train_data.question2.tolist()
                     + test_data.question1.tolist()
@@ -95,7 +148,8 @@ def main():
                     recurrent_dropout=LSTM_DROPOUT))
 
     merged = Sequential()
-    merged.add(Merge([model1, model2], mode='concat', concat_axis=1))
+
+    merged.add(Merge([model1, model2], mode='concat'))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
@@ -111,23 +165,29 @@ def main():
                    optimizer='adam',
                    metrics=['accuracy'])
 
-    early_stopping = EarlyStopping(monitor='val_loss', patience=3)
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+    class_weight = {0: (1 - POS_DISTRIB_IN_TEST) / (1 - pos_distrib_in_train),
+                    1:  POS_DISTRIB_IN_TEST / pos_distrib_in_train}
+    print('class weight: {0}'.format(class_weight))
+
+    early_stopping = EarlyStopping(monitor='val_loss', patience=3)
     model_checkpoint = ModelCheckpoint(MODEL_FILE.format(timestamp),
                                        save_best_only=True,
                                        save_weights_only=True)
 
     hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
-              y=y_train_stacked,
-              validation_split=0.1,
-              epochs=200,
-              batch_size=2048,
-              verbose=1,
-              shuffle=True,
-              callbacks=[early_stopping, model_checkpoint])
+                      y=y_train_stacked,
+                      validation_split=0.1,
+                      class_weight=class_weight,
+                      epochs=EPOCH,
+                      batch_size=2048,
+                      verbose=1,
+                      shuffle=True,
+                      callbacks=[early_stopping, model_checkpoint])
 
     merged.load_weights(MODEL_FILE)
     bst_val_score = min(hist.history['val_loss'])
+    print('training finished')
     print('min cv log-loss {0}'.format(bst_val_score))
 
     # predict
@@ -138,6 +198,8 @@ def main():
 
     submission = pd.DataFrame({'test_id': range(0, preds.shape[0]),
                                'is_duplicate': preds.ravel()})
+    print('prediction mean {0}'.format(submission.is_duplicate.mean()))
+
     submission.to_csv(SUBMISSION_FILE, index=False)
 
 
