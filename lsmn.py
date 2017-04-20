@@ -81,14 +81,15 @@ def main():
     w2v_model = KeyedVectors.load_word2vec_format(MODEL, binary=True)
 
     # load data
-    print('loading data...')
+    print('loading training data...')
     train_data = pd.read_csv(TRAIN_DATA).fillna('na')
     train_data.question1 = train_data.question1.map(clean_txt)
     train_data.question2 = train_data.question2.map(clean_txt)
 
     pos_distrib_in_train = train_data.is_duplicate.mean()
-    print('{0}% positives in training data...'.format(pos_distrib_in_train * 100))
+    print('{0}% positives in training data'.format(pos_distrib_in_train * 100))
 
+    print('loading testing data...')
     test_data = pd.read_csv(TEST_DATA).fillna('na')
     test_data.question1 = test_data.question1.map(clean_txt)
     test_data.question2 = test_data.question2.map(clean_txt)
@@ -196,7 +197,7 @@ def main():
     preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
-    submission = pd.DataFrame({'test_id': range(0, preds.shape[0]),
+    submission = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
                                'is_duplicate': preds.ravel()})
     print('prediction mean {0}'.format(submission.is_duplicate.mean()))
 
