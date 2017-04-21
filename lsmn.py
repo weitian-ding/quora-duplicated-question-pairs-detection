@@ -15,8 +15,8 @@ TEST_DATA = 'input/test.csv'
 
 SUBMISSION_FILE = 'data/submission.csv'
 
-MODEL = 'models/GoogleNews-Vectors-negative300.bin'
-MODEL_FILE = 'models/lstm-{0}'
+W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
+MODEL_FILENAME = 'models/lstm-{0}'
 
 W2V_DIM = 300
 MAX_SEQ_LEN = 40
@@ -25,7 +25,7 @@ LSTM_UNITS = 225
 DENSE_UNITS = 125
 LSTM_DROPOUT = 0.25
 DENSE_DROPOUT = 0.25
-EPOCH = 5
+EPOCH = 1
 
 POS_DISTRIB_IN_TEST = 0.1746
 
@@ -78,7 +78,7 @@ def texts_to_padded_seq(texts, tk):
 def main():
 
     print('loading GoogleNews-Vectors-negative300.bin...')
-    w2v_model = KeyedVectors.load_word2vec_format(MODEL, binary=True)
+    w2v_model = KeyedVectors.load_word2vec_format(W2V_MODEL, binary=True)
 
     # load data
     print('loading training data...')
@@ -171,8 +171,10 @@ def main():
                     1:  POS_DISTRIB_IN_TEST / pos_distrib_in_train}
     print('class weight: {0}'.format(class_weight))
 
+    model_filename = MODEL_FILENAME.format(timestamp)
+
     early_stopping = EarlyStopping(monitor='val_loss', patience=3)
-    model_checkpoint = ModelCheckpoint(MODEL_FILE.format(timestamp),
+    model_checkpoint = ModelCheckpoint(model_filename,
                                        save_best_only=True,
                                        save_weights_only=True)
 
@@ -186,7 +188,7 @@ def main():
                       shuffle=True,
                       callbacks=[early_stopping, model_checkpoint])
 
-    merged.load_weights(MODEL_FILE)
+    merged.load_weights(model_filename)
     bst_val_score = min(hist.history['val_loss'])
     print('training finished')
     print('min cv log-loss {0}'.format(bst_val_score))
