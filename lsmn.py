@@ -14,7 +14,8 @@ TRAIN_DATA = 'input/train.csv'
 TEST_DATA = 'input/test.csv'
 
 TRAIN_PRED = 'data/lstm_train_pred.csv'
-SUBMISSION_FILE = 'data/lstm_test_pred.csv'
+TEST_PRED = 'data/lstm_test_pred.csv'
+SUBMISSION_FILE = 'data/lstm_test_pred_re_weighted.csv'
 
 W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 MODEL_FILENAME = 'models/lstm-{0}'
@@ -173,7 +174,7 @@ def main():
 
     merged = Sequential()
 
-    merged.add(Merge([lsmn_model1, feat_model, lsmn_layer_model2], mode='concat'))
+    merged.add(Merge([lsmn_model1, lsmn_layer_model2, feat_model], mode='concat'))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
@@ -199,7 +200,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = merged.fit([seq1_train_stacked, feat_train_stacked, seq2_train_stacked],
+    hist = merged.fit([seq1_train_stacked, seq2_train_stacked, feat_train_stacked],
                       y=y_train_stacked,
                       validation_split=0.2,
                       #class_weight=class_weight,
@@ -216,8 +217,8 @@ def main():
 
     # predict
     print('predicting testing set...')
-    preds = merged.predict([seq1_test, feat_test, seq2_test], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_test, feat_test, seq1_test], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_test, seq2_test, feat_test], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_test, seq1_test, feat_test], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
@@ -229,8 +230,8 @@ def main():
     preds_test.to_csv(SUBMISSION_FILE, index=False)
 
     print('predicting training set...')
-    preds = merged.predict([seq1_train, feat_train, seq2_train], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_train, feat_train, seq1_train], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_train, seq2_train, feat_train], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_train, seq1_train, feat_train], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_train = pd.DataFrame({'lstm_pred': preds.ravel()})
