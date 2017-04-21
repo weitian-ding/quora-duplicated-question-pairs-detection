@@ -16,8 +16,8 @@ SUBMISSION_FILE = 'data/bst_ensemble_test_pred.csv'
 
 POS_PROP = 0.1746
 
-L1_NROUNDS = 10
-L2_NROUNDS = 10
+L1_NROUNDS = 500
+L2_NROUNDS = 500
 
 
 def train_test_split_rebalance(features):
@@ -179,7 +179,7 @@ def main():
     print('predicting training data...')
     d_train = xgb.DMatrix(l2_train_feat.drop(['is_duplicate'], axis=1))
     pred_train = bst.predict(d_train)
-    write_predict(d_train, TRAIN_PREDICTION)
+    write_predict(pred_train, TRAIN_PREDICTION)
 
     print('predicting testing data...')
     d_test = xgb.DMatrix(l2_test_feat)
