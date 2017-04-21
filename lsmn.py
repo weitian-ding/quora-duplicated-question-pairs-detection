@@ -26,7 +26,7 @@ LSTM_UNITS = 225
 DENSE_UNITS = 125
 LSTM_DROPOUT = 0.25
 DENSE_DROPOUT = 0.25
-EPOCH = 200
+EPOCH = 30
 
 POS_DISTRIB_IN_TEST = 0.1746
 
@@ -89,6 +89,11 @@ def main():
 
     pos_distrib_in_train = train_data.is_duplicate.mean()
     print('{0}% positives in training data'.format(pos_distrib_in_train * 100))
+
+    def re_weight(score):
+        pa = POS_DISTRIB_IN_TEST / pos_distrib_in_train
+        pb = (1 - POS_DISTRIB_IN_TEST) / (1 - pos_distrib_in_train)
+        return pa * score / (pa * score + pb * (1 - score))
 
     print('loading testing data...')
     test_data = pd.read_csv(TEST_DATA).fillna('na')
@@ -168,9 +173,11 @@ def main():
                    metrics=['accuracy'])
 
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+    '''
     class_weight = {0: (1 - POS_DISTRIB_IN_TEST) / (1 - pos_distrib_in_train),
                     1:  POS_DISTRIB_IN_TEST / pos_distrib_in_train}
     print('class weight: {0}'.format(class_weight))
+    '''
 
     model_filename = MODEL_FILENAME.format(timestamp)
 
@@ -181,8 +188,8 @@ def main():
 
     hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
                       y=y_train_stacked,
-                      validation_split=0.1,
-                      class_weight=class_weight,
+                      validation_split=0.2,
+                      #class_weight=class_weight,
                       epochs=EPOCH,
                       batch_size=2048,
                       verbose=1,
@@ -200,22 +207,23 @@ def main():
     preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
-    pred_df = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
+    preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
                                'is_duplicate': preds.ravel()})
-    print('prediction mean {0}'.format(pred_df.is_duplicate.mean()))
+    preds_test['is_duplicate'] = preds_test.is_duplicate.map(re_weight)
+    print('prediction mean {0}'.format(preds_test.is_duplicate.mean()))
 
     print('writing predictions...')
-    pred_df.to_csv(SUBMISSION_FILE, index=False)
+    preds_test.to_csv(SUBMISSION_FILE, index=False)
 
     print('predicting training set for model stacking...')
     preds = merged.predict([seq1_train, seq2_train], batch_size=8192, verbose=1)
     preds += merged.predict([seq2_train, seq1_train], batch_size=8192, verbose=1)
     preds /= 2
 
-    pred_df = pd.DataFrame({'lstm_pred': preds.ravel()})
+    preds_train = pd.DataFrame({'lstm_pred': preds.ravel()})
 
     print('writing predictions...')
-    pred_df.to_csv(TRAIN_PRED, index=False)
+    preds_train.to_csv(TRAIN_PRED, index=False)
 
 
 if __name__ == '__main__':
