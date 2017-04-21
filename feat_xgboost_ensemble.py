@@ -120,16 +120,16 @@ def main():
         print('loading {0}...'.format(feat_train_filename))
         feat_train = pd.read_csv(feat_train_filename)
         feat_test_filename = feat_train_filename[0:-len('train.csv')] + 'test.csv'
-        print('loading {0}'.format(feat_test_filename))
+        print('loading {0}...'.format(feat_test_filename))
         feat_test = pd.read_csv(feat_test_filename)
 
-        if feat_name == 'wm_':
-            feat_sets['w2v_'][0]['wm'] = feat_train
-            feat_sets['w2v_'][1]['wm'] = feat_test
+        if feat_name == 'features/wm_':
+            feat_sets['features/w2v_'][0]['wm'] = feat_train
+            feat_sets['features/w2v_'][1]['wm'] = feat_test
         else:
             feat_sets[feat_name] = (feat_train, feat_test)
 
-        print('loaded {0} features'.format(len(feat_train)))
+        print('loaded {0} samples'.format(len(feat_train)))
 
     l2_train_feat = pd.DataFrame()
     l2_train_feat['is_duplicate'] = qpair_train.is_duplicate
