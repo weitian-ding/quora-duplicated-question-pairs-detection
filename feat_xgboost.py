@@ -5,8 +5,8 @@ from sklearn.externals import joblib
 from sklearn.model_selection import train_test_split
 
 TRAIN_DATA = 'input/train.csv'
-TRAIN_FEATURES = "features/basic_train.csv"
-TEST_FEATURES = "features/basic_test.csv"
+TRAIN_FEATURES = "features/train.csv"
+TEST_FEATURES = "features/test.csv"
 
 TRAIN_PREDICTION = 'data/train_pred_bst.csv'
 SUBMISSION_FILE = 'data/test_pred.csv'
