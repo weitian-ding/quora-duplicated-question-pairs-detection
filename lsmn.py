@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense
+from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
@@ -33,6 +33,12 @@ POS_DISTRIB_IN_TEST = 0.1746
 
 FEAT_TRAIN_FILE = 'features/train.csv'
 FEAT_TEST_FILE = 'features/test.csv'
+
+# cnn layer
+cnn_nb_filters = 62
+filter_length = 5
+nb_filter = 64
+pool_length = 4
 
 
 def clean_txt(text):
@@ -136,6 +142,7 @@ def main():
             w2v_weights[i] = w2v_model.word_vec(word)
     print('w2v weight matrix dim {0}'.format(w2v_weights.shape))
 
+    '''
     # load features
     print('loading features...')
     feat_train = pd.read_csv(FEAT_TRAIN_FILE)
@@ -144,13 +151,16 @@ def main():
     feat_train_stacked = np.vstack((feat_train, feat_train))
     feat_dim = feat_train.shape[1]
     feat_test = pd.read_csv(FEAT_TEST_FILE).as_matrix()
+    '''
 
     # model
     print('building model...')
 
+    '''
     feat_model = Sequential()
     feat_model.add(Dense(32, input_dim=feat_dim, activation='relu'))
     # feat_model.add(BatchNormalization())
+    '''
 
     lsmn_model1 = Sequential()
     lsmn_model1.add(Embedding(vocab_size,
@@ -158,23 +168,35 @@ def main():
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
+    lsmn_model1.add(Conv1D(cnn_nb_filters,
+                     filter_length = filter_length,
+                     padding='valid',
+                     activation='relu',
+                     strides=1))
+    lsmn_model1.add(MaxPooling1D(pool_size=pool_length))
     lsmn_model1.add(LSTM(LSTM_UNITS,
                     dropout=LSTM_DROPOUT,
                     recurrent_dropout=LSTM_DROPOUT))
 
-    lsmn_layer_model2 = Sequential()
-    lsmn_layer_model2.add(Embedding(vocab_size,
+    lsmn_model2 = Sequential()
+    lsmn_model2.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
-    lsmn_layer_model2.add(LSTM(LSTM_UNITS,
+    lsmn_model2.add(Conv1D(cnn_nb_filters,
+                           filter_length=filter_length,
+                           padding='valid',
+                           activation='relu',
+                           strides=1))
+    lsmn_model2.add(MaxPooling1D(pool_size=pool_length))
+    lsmn_model2.add(LSTM(LSTM_UNITS,
                     dropout=LSTM_DROPOUT,
                     recurrent_dropout=LSTM_DROPOUT))
 
     merged = Sequential()
 
-    merged.add(Merge([lsmn_model1, lsmn_layer_model2, feat_model], mode='concat'))
+    merged.add(Merge([lsmn_model1, lsmn_model2], mode='concat'))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
@@ -200,7 +222,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = merged.fit([seq1_train_stacked, seq2_train_stacked, feat_train_stacked],
+    hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
                       y=y_train_stacked,
                       validation_split=0.2,
                       #class_weight=class_weight,
@@ -217,8 +239,8 @@ def main():
 
     # predict
     print('predicting testing set...')
-    preds = merged.predict([seq1_test, seq2_test, feat_test], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_test, seq1_test, feat_test], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
@@ -230,8 +252,8 @@ def main():
     preds_test.to_csv(SUBMISSION_FILE, index=False)
 
     print('predicting training set...')
-    preds = merged.predict([seq1_train, seq2_train, feat_train], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_train, seq1_train, feat_train], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_train, seq2_train], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_train, seq1_train], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_train = pd.DataFrame({'lstm_pred': preds.ravel()})
