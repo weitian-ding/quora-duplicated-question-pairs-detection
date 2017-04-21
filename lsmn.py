@@ -13,7 +13,8 @@ from keras.preprocessing.text import Tokenizer
 TRAIN_DATA = 'input/train.csv'
 TEST_DATA = 'input/test.csv'
 
-SUBMISSION_FILE = 'data/submission.csv'
+TRAIN_PRED = 'data/lstm_train_pred.csv'
+SUBMISSION_FILE = 'data/lstm_test_pred.csv'
 
 W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 MODEL_FILENAME = 'models/lstm-{0}'
@@ -25,7 +26,7 @@ LSTM_UNITS = 225
 DENSE_UNITS = 125
 LSTM_DROPOUT = 0.25
 DENSE_DROPOUT = 0.25
-EPOCH = 1
+EPOCH = 200
 
 POS_DISTRIB_IN_TEST = 0.1746
 
@@ -194,16 +195,28 @@ def main():
     print('min cv log-loss {0}'.format(bst_val_score))
 
     # predict
-    print('predicting...')
+    print('predicting testing set...')
     preds = merged.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
     preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
-    submission = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
+    pred_df = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
                                'is_duplicate': preds.ravel()})
-    print('prediction mean {0}'.format(submission.is_duplicate.mean()))
+    print('prediction mean {0}'.format(pred_df.is_duplicate.mean()))
 
-    submission.to_csv(SUBMISSION_FILE, index=False)
+    print('writing predictions...')
+    pred_df.to_csv(SUBMISSION_FILE, index=False)
+
+    print('predicting training set for model stacking...')
+    preds = merged.predict([seq1_train, seq2_train], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_train, seq1_train], batch_size=8192, verbose=1)
+    preds /= 2
+
+    pred_df = pd.DataFrame({'lstm_pred': preds.ravel()})
+    print('prediction mean {0}'.format(pred_df.is_duplicate.mean()))
+
+    print('writing predictions...')
+    pred_df.to_csv(SUBMISSION_FILE, index=False)
 
 
 if __name__ == '__main__':
