@@ -30,6 +30,9 @@ EPOCH = 30
 
 POS_DISTRIB_IN_TEST = 0.1746
 
+FEAT_TRAIN_FILE = 'features/train.csv'
+FEAT_TEST_FILE = 'features/test.csv'
+
 
 def clean_txt(text):
     text = str(text).lower()
@@ -132,31 +135,45 @@ def main():
             w2v_weights[i] = w2v_model.word_vec(word)
     print('w2v weight matrix dim {0}'.format(w2v_weights.shape))
 
+    # load features
+    print('loading features...')
+    feat_train = pd.read_csv(FEAT_TRAIN_FILE)
+    print('features = {0}'.format(list(feat_train)))
+    feat_train = feat_train.as_matrix()
+    feat_train_stacked = np.vstack((feat_train, feat_train))
+    feat_dim = feat_train.shape[1]
+    feat_test = pd.read_csv(FEAT_TEST_FILE).as_matrix()
+
     # model
     print('building model...')
-    model1 = Sequential()
-    model1.add(Embedding(vocab_size,
+
+    feat_model = Sequential()
+    feat_model.add(Dense(32, input_dim=feat_dim, activation='relu'))
+    # feat_model.add(BatchNormalization())
+
+    lsmn_model1 = Sequential()
+    lsmn_model1.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
-    model1.add(LSTM(LSTM_UNITS,
+    lsmn_model1.add(LSTM(LSTM_UNITS,
                     dropout=LSTM_DROPOUT,
                     recurrent_dropout=LSTM_DROPOUT))
 
-    model2 = Sequential()
-    model2.add(Embedding(vocab_size,
+    lsmn_layer_model2 = Sequential()
+    lsmn_layer_model2.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
-    model2.add(LSTM(LSTM_UNITS,
+    lsmn_layer_model2.add(LSTM(LSTM_UNITS,
                     dropout=LSTM_DROPOUT,
                     recurrent_dropout=LSTM_DROPOUT))
 
     merged = Sequential()
 
-    merged.add(Merge([model1, model2], mode='concat'))
+    merged.add(Merge([lsmn_model1, feat_model, lsmn_layer_model2], mode='concat'))
     merged.add(Dropout(DENSE_DROPOUT))
     merged.add(BatchNormalization())
 
@@ -166,18 +183,14 @@ def main():
 
     merged.add(Dense(1, activation='sigmoid'))
 
-    # train model
-    print('training model...')
     merged.compile(loss='binary_crossentropy',
                    optimizer='adam',
                    metrics=['accuracy'])
 
+    # train model
+    print('training model...')
+
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
-    '''
-    class_weight = {0: (1 - POS_DISTRIB_IN_TEST) / (1 - pos_distrib_in_train),
-                    1:  POS_DISTRIB_IN_TEST / pos_distrib_in_train}
-    print('class weight: {0}'.format(class_weight))
-    '''
 
     model_filename = MODEL_FILENAME.format(timestamp)
 
@@ -186,7 +199,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
+    hist = merged.fit([seq1_train_stacked, feat_train_stacked, seq2_train_stacked],
                       y=y_train_stacked,
                       validation_split=0.2,
                       #class_weight=class_weight,
@@ -203,8 +216,8 @@ def main():
 
     # predict
     print('predicting testing set...')
-    preds = merged.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
+    preds = merged.predict([seq1_test, feat_test, seq2_test], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_test, feat_test, seq1_test], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
@@ -215,9 +228,9 @@ def main():
     print('writing predictions...')
     preds_test.to_csv(SUBMISSION_FILE, index=False)
 
-    print('predicting training set for model stacking...')
-    preds = merged.predict([seq1_train, seq2_train], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_train, seq1_train], batch_size=8192, verbose=1)
+    print('predicting training set...')
+    preds = merged.predict([seq1_train, feat_train, seq2_train], batch_size=8192, verbose=1)
+    preds += merged.predict([seq2_train, feat_train, seq1_train], batch_size=8192, verbose=1)
     preds /= 2
 
     preds_train = pd.DataFrame({'lstm_pred': preds.ravel()})
