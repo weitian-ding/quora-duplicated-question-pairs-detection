@@ -213,10 +213,9 @@ def main():
     preds /= 2
 
     pred_df = pd.DataFrame({'lstm_pred': preds.ravel()})
-    print('prediction mean {0}'.format(pred_df.is_duplicate.mean()))
 
     print('writing predictions...')
-    pred_df.to_csv(SUBMISSION_FILE, index=False)
+    pred_df.to_csv(TRAIN_PRED, index=False)
 
 
 if __name__ == '__main__':
