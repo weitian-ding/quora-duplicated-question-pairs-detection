@@ -11,7 +11,7 @@ TEST_FEATURES = "features/basic_test.csv"
 TRAIN_PREDICTION = 'data/train_pred_bst.csv'
 SUBMISSION_FILE = 'data/test_pred.csv'
 
-POS_PROP = 0.165
+POS_PROP = 0.1746
 
 
 def train_test_split_rebalance(features):
@@ -72,17 +72,17 @@ def main():
 
     params = {'objective': 'binary:logistic',
               'eval_metric': ['logloss'],
-              'eta': 0.05,
-              'max_depth': 10,
+              'eta': 0.02,
+              'max_depth': 8,
               "subsample": 0.7,
               "min_child_weight": 1,
-              "colsample_bytree": 0.7,
+              "colsample_bytree": 0.3,
               "silent": 1,
               "seed": 1632,
               'tree_method': 'exact'
               }
 
-    bst = xgb.train(params, d_train, 500, [(d_train, 'train'), (d_valid, 'cross-validation')],
+    bst = xgb.train(params, d_train, 2000, [(d_train, 'train'), (d_valid, 'cross-validation')],
                     early_stopping_rounds=50, verbose_eval=10)
 
     # saving model
