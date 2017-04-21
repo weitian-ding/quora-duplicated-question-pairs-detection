@@ -8,8 +8,8 @@ TRAIN_DATA = 'input/train.csv'
 TRAIN_FEATURES = "features/train.csv"
 TEST_FEATURES = "features/test.csv"
 
-TRAIN_PREDICTION = 'data/train_pred_bst.csv'
-SUBMISSION_FILE = 'data/test_pred_bst.csv'
+TRAIN_PREDICTION = 'data/bst_train_pred.csv'
+SUBMISSION_FILE = 'data/bst_test_pred.csv'
 
 POS_PROP = 0.1746
 
