@@ -76,7 +76,7 @@ def main():
               'max_depth': 8,
               "subsample": 0.7,
               "min_child_weight": 1,
-              "colsample_bytree": 0.3,
+              "colsample_bytree": 0.5,
               "silent": 1,
               "seed": 1632,
               'tree_method': 'exact'
