@@ -116,8 +116,6 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              activation='relu',
                              subsample_length=1))
 
-    model2.add(GlobalMaxPooling1D())
-
     model2.add(Dropout(0.2))
 
     model2.add(Convolution1D(nb_filter=nb_filter,
