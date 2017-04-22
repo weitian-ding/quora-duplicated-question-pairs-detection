@@ -28,7 +28,7 @@ LSTM_UNITS = 225
 dense_units = 125
 LSTM_DROPOUT = 0.25
 dropout = 0.25
-EPOCH = 30
+EPOCH = 100
 
 POS_DISTRIB_IN_TEST = 0.1746
 
@@ -36,7 +36,6 @@ FEAT_TRAIN_FILE = 'features/train.csv'
 FEAT_TEST_FILE = 'features/test.csv'
 
 # cnn layer
-cnn_nb_filters = 62
 filter_length = 5
 nb_filter = 64
 pool_length = 4
@@ -98,9 +97,9 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
 
-    model1.add(LSTM(225,
-                    dropout=0.25,
-                    recurrent_dropout=0.25))
+    model1.add(LSTM(300,
+                    dropout=dropout,
+                    recurrent_dropout=dropout))
 
     model2 = Sequential()
 
@@ -116,7 +115,7 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              activation='relu',
                              subsample_length=1))
 
-    model2.add(Dropout(0.2))
+    model2.add(Dropout(dropout))
 
     model2.add(Convolution1D(nb_filter=nb_filter,
                              filter_length=filter_length,
@@ -126,10 +125,10 @@ def build_doc2vec_model(vocab_size, w2v_weights):
 
     model2.add(GlobalMaxPooling1D())
 
-    model2.add(Dropout(0.2))
+    model2.add(Dropout(dropout))
 
-    model2.add(Dense(300))
-    model2.add(Dropout(0.2))
+    model2.add(Dense(200))
+    model2.add(Dropout(dropout))
     model2.add(BatchNormalization())
 
     return [model1, model2]
@@ -163,7 +162,7 @@ def main():
     print('tokenizing questions...')
     tk = Tokenizer(num_words=MAX_VOCAB_SIZE)
     print('sample')
-    print(train_data.question1.head(1000))
+    print(train_data.question1.head())
 
     tk.fit_on_texts(train_data.question1.tolist()
                     + train_data.question2.tolist()
@@ -191,25 +190,8 @@ def main():
             w2v_weights[i] = w2v_model.word_vec(word)
     print('w2v weight matrix dim {0}'.format(w2v_weights.shape))
 
-    '''
-    # load features
-    print('loading features...')
-    feat_train = pd.read_csv(FEAT_TRAIN_FILE)
-    print('features = {0}'.format(list(feat_train)))
-    feat_train = feat_train.as_matrix()
-    feat_train_stacked = np.vstack((feat_train, feat_train))
-    feat_dim = feat_train.shape[1]
-    feat_test = pd.read_csv(FEAT_TEST_FILE).as_matrix()
-    '''
-
     # model
     print('building model...')
-
-    '''
-    feat_model = Sequential()
-    feat_model.add(Dense(32, input_dim=feat_dim, activation='relu'))
-    # feat_model.add(BatchNormalization())
-    '''
 
     merged = Sequential()
 
@@ -217,11 +199,23 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(200, activation='relu'))
+    merged.add(Dense(600, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(125, activation='relu'))
+    merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(200, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
@@ -245,7 +239,7 @@ def main():
 
     hist = merged.fit(([seq1_train_stacked] * n_doc2vec_models) + ([seq2_train_stacked] * n_doc2vec_models),
                       y=y_train_stacked,
-                      validation_split=0.2,
+                      validation_split=0.1,
                       #class_weight=class_weight,
                       epochs=EPOCH,
                       batch_size=2048,
@@ -268,10 +262,13 @@ def main():
 
     preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
                                'is_duplicate': preds.ravel()})
-    preds_test['is_duplicate'] = preds_test.is_duplicate.map(re_weight)
-    print('prediction mean {0}'.format(preds_test.is_duplicate.mean()))
+
 
     print('writing predictions...')
+    preds_test.to_csv(TEST_PRED, index=False)
+
+    preds_test['is_duplicate'] = preds_test.is_duplicate.map(re_weight)
+    print('prediction mean {0}'.format(preds_test.is_duplicate.mean()))
     preds_test.to_csv(SUBMISSION_FILE, index=False)
 
     print('predicting training set...')
