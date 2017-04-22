@@ -3,6 +3,7 @@ import re
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D, Convolution1D, \
@@ -18,7 +19,8 @@ TRAIN_PRED = 'data/lstm_train_pred.csv'
 TEST_PRED = 'data/lstm_test_pred.csv'
 SUBMISSION_FILE = 'data/lstm_test_pred_re_weighted.csv'
 
-W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
+GOOGLE_W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
+GLOVE_W2V_MODEL = 'models/glove.42B.300d.txt'
 MODEL_FILENAME = 'models/lstm-{0}'
 
 W2V_DIM = 300
@@ -35,10 +37,6 @@ POS_DISTRIB_IN_TEST = 0.1746
 FEAT_TRAIN_FILE = 'features/train.csv'
 FEAT_TEST_FILE = 'features/test.csv'
 
-# cnn layer
-filter_length = 5
-nb_filter = 64
-pool_length = 4
 
 n_doc2vec_models = 2
 
@@ -88,6 +86,13 @@ def texts_to_padded_seq(texts, tk):
 
 
 def build_doc2vec_model(vocab_size, w2v_weights):
+    # cnn layer
+    filter_length = 5
+    nb_filter = 64
+    pool_length = 4
+
+    # lstm layer
+    lstm_units = 225
 
     model1 = Sequential()
 
@@ -97,57 +102,29 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
 
-    model1.add(LSTM(300,
+    model1.add(LSTM(lstm_units,
                     dropout=dropout,
                     recurrent_dropout=dropout))
 
-    model2 = Sequential()
+    # model2 = Sequential()
 
-    model2.add(Embedding(vocab_size,
-                         W2V_DIM,
-                         weights=[w2v_weights],
-                         input_length=MAX_SEQ_LEN,
-                         trainable=False))
-
-    model2.add(Convolution1D(nb_filter=nb_filter,
-                             filter_length=filter_length,
-                             border_mode='valid',
-                             activation='relu',
-                             subsample_length=1))
-
-    model2.add(Dropout(dropout))
-
-    model2.add(Convolution1D(nb_filter=nb_filter,
-                             filter_length=filter_length,
-                             border_mode='valid',
-                             activation='relu',
-                             subsample_length=1))
-
-    model2.add(Dropout(dropout))
-
-    model2.add(Convolution1D(nb_filter=nb_filter,
-                             filter_length=filter_length,
-                             border_mode='valid',
-                             activation='relu',
-                             subsample_length=1))
-
-    model2.add(Dropout(dropout))
-
-    model2.add(GlobalMaxPooling1D())
-
-    model2.add(Dropout(dropout))
-
-    model2.add(Dense(200))
-    model2.add(Dropout(dropout))
-    model2.add(BatchNormalization())
-
-    return [model1, model2]
+    return [model1]
 
 
 def main():
 
-    print('loading GoogleNews-Vectors-negative300.bin...')
-    w2v_model = KeyedVectors.load_word2vec_format(W2V_MODEL, binary=True)
+    print('loading {0}...'.format(GOOGLE_W2V_MODEL))
+    google_w2v_model = KeyedVectors.load_word2vec_format(GOOGLE_W2V_MODEL, binary=True)
+
+    print('loading {0}...'.format(GLOVE_W2V_MODEL))
+    glove_w2v_model = {}
+    f = open(GLOVE_W2V_MODEL)
+    for line in tqdm(f):
+        values = line.split()
+        word = values[0]
+        coefs = np.asarray(values[1:], dtype='float32')
+        glove_w2v_model[word] = coefs
+    f.close()
 
     # load data
     print('loading training data...')
@@ -192,28 +169,30 @@ def main():
     seq1_test = texts_to_padded_seq(test_data.question1.tolist(), tk)
     seq2_test = texts_to_padded_seq(test_data.question2.tolist(), tk)
 
-    print('preparing w2v weight matrix...')
+    print('preparing google w2v weight matrix...')
     vocab_size = len(tk.word_index) + 1
-    w2v_weights = np.zeros((vocab_size, W2V_DIM))
+    google_w2v_weights = np.zeros((vocab_size, W2V_DIM))
     for word, i in tk.word_index.items():
-        if word in w2v_model.vocab:
-            w2v_weights[i] = w2v_model.word_vec(word)
-    print('w2v weight matrix dim {0}'.format(w2v_weights.shape))
+        if word in google_w2v_model.vocab:
+            google_w2v_weights[i] = google_w2v_model.word_vec(word)
+    print('google w2v weight matrix dim {0}'.format(google_w2v_weights.shape))
+
+    print('preparing glove w2v weight matrix...')
+    glove_w2v_weights = np.zeros((vocab_size, W2V_DIM))
+    for word, i in tk.word_index.items():
+        if word in glove_w2v_model:
+            glove_w2v_model[i] = glove_w2v_model[word]
+    print('google w2v weight matrix dim {0}'.format(glove_w2v_weights.shape))
 
     # model
     print('building model...')
 
     merged = Sequential()
 
-    merged.add(Merge(build_doc2vec_model(vocab_size, w2v_weights) + build_doc2vec_model(vocab_size, w2v_weights), mode='concat'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(600, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(300, activation='relu'))
+    merged.add(Merge(build_doc2vec_model(vocab_size, google_w2v_weights)
+                     + build_doc2vec_model(vocab_size, glove_w2v_weights)
+                     + build_doc2vec_model(vocab_size, google_w2v_weights)
+                     + build_doc2vec_model(vocab_size, glove_w2v_model), mode='concat'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
@@ -225,15 +204,7 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(300, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(200, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(200, activation='relu'))
+    merged.add(Dense(125, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
