@@ -192,7 +192,7 @@ def main():
     merged.add(Merge(build_doc2vec_model(vocab_size, google_w2v_weights)
                      + build_doc2vec_model(vocab_size, glove_w2v_weights)
                      + build_doc2vec_model(vocab_size, google_w2v_weights)
-                     + build_doc2vec_model(vocab_size, glove_w2v_model), mode='concat'))
+                     + build_doc2vec_model(vocab_size, glove_w2v_weights), mode='concat'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
