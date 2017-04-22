@@ -123,6 +123,16 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              activation='relu',
                              subsample_length=1))
 
+    model2.add(Dropout(dropout))
+
+    model2.add(Convolution1D(nb_filter=nb_filter,
+                             filter_length=filter_length,
+                             border_mode='valid',
+                             activation='relu',
+                             subsample_length=1))
+
+    model2.add(Dropout(dropout))
+
     model2.add(GlobalMaxPooling1D())
 
     model2.add(Dropout(dropout))
@@ -212,6 +222,14 @@ def main():
     merged.add(BatchNormalization())
 
     merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(200, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
