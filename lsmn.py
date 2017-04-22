@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D, Convolution1D
+from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D, Convolution1D, \
+    GlobalMaxPooling1D
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
@@ -105,14 +106,14 @@ def build_doc2vec_model(vocab_size, w2v_weights):
     model2.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
-                         input_length=40,
+                         input_length=MAX_SEQ_LEN,
                          trainable=False))
     model2.add(Convolution1D(nb_filter=nb_filter,
                              filter_length=filter_length,
                              border_mode='valid',
                              activation='relu',
                              subsample_length=1))
-    model2.add(MaxPooling1D())
+    model2.add(GlobalMaxPooling1D())
     model2.add(Dropout(0.2))
 
     model2.add(Convolution1D(nb_filter=nb_filter,
