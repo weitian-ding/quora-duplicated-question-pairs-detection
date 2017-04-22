@@ -12,7 +12,7 @@ from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
 
 TRAIN_DATA = 'input/train.csv'
-TEST_DATA = 'input/test.csv'
+TEST_DATA = 'input/train.csv'
 
 TRAIN_PRED = 'data/lstm_train_pred.csv'
 TEST_PRED = 'data/lstm_test_pred.csv'
@@ -103,17 +103,21 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                     recurrent_dropout=0.25))
 
     model2 = Sequential()
+
     model2.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
+
     model2.add(Convolution1D(nb_filter=nb_filter,
                              filter_length=filter_length,
                              border_mode='valid',
                              activation='relu',
                              subsample_length=1))
+
     model2.add(GlobalMaxPooling1D())
+
     model2.add(Dropout(0.2))
 
     model2.add(Convolution1D(nb_filter=nb_filter,
@@ -122,7 +126,8 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              activation='relu',
                              subsample_length=1))
 
-    model2.add(MaxPooling1D())
+    model2.add(GlobalMaxPooling1D())
+
     model2.add(Dropout(0.2))
 
     model2.add(Dense(300))
