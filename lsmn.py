@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from gensim.models import KeyedVectors
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D
+from keras.layers import Embedding, LSTM, Merge, Dropout, BatchNormalization, Dense, Conv1D, MaxPooling1D, Convolution1D
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
@@ -40,6 +40,7 @@ filter_length = 5
 nb_filter = 64
 pool_length = 4
 
+n_doc2vec_models = 2
 
 def clean_txt(text):
     text = str(text).lower()
@@ -100,7 +101,34 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                     dropout=0.25,
                     recurrent_dropout=0.25))
 
-    return [model1]
+    model2 = Sequential()
+    model2.add(Embedding(vocab_size,
+                         W2V_DIM,
+                         weights=[w2v_weights],
+                         input_length=40,
+                         trainable=False))
+    model2.add(Convolution1D(nb_filter=nb_filter,
+                             filter_length=filter_length,
+                             border_mode='valid',
+                             activation='relu',
+                             subsample_length=1))
+    model2.add(MaxPooling1D())
+    model2.add(Dropout(0.2))
+
+    model2.add(Convolution1D(nb_filter=nb_filter,
+                             filter_length=filter_length,
+                             border_mode='valid',
+                             activation='relu',
+                             subsample_length=1))
+
+    model2.add(MaxPooling1D())
+    model2.add(Dropout(0.2))
+
+    model2.add(Dense(300))
+    model2.add(Dropout(0.2))
+    model2.add(BatchNormalization())
+
+    return [model1, model2]
 
 
 def main():
@@ -189,6 +217,10 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
+    merged.add(Dense(dense_units, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
     merged.add(Dense(1, activation='sigmoid'))
 
     merged.compile(loss='binary_crossentropy',
@@ -207,7 +239,7 @@ def main():
                                        save_best_only=True,
                                        save_weights_only=True)
 
-    hist = merged.fit([seq1_train_stacked, seq2_train_stacked],
+    hist = merged.fit(([seq1_train_stacked] * n_doc2vec_models) + ([seq2_train_stacked] * n_doc2vec_models),
                       y=y_train_stacked,
                       validation_split=0.2,
                       #class_weight=class_weight,
@@ -224,8 +256,10 @@ def main():
 
     # predict
     print('predicting testing set...')
-    preds = merged.predict([seq1_test, seq2_test], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_test, seq1_test], batch_size=8192, verbose=1)
+    preds = merged.predict(([seq1_test] * n_doc2vec_models) + ([seq2_test] * n_doc2vec_models),
+                           batch_size=8192, verbose=1)
+    preds += merged.predict(([seq2_test] * n_doc2vec_models) + ([seq1_test] * n_doc2vec_models),
+                            batch_size=8192, verbose=1)
     preds /= 2
 
     preds_test = pd.DataFrame({'test_id': range(0, test_data.shape[0]),
@@ -237,8 +271,10 @@ def main():
     preds_test.to_csv(SUBMISSION_FILE, index=False)
 
     print('predicting training set...')
-    preds = merged.predict([seq1_train, seq2_train], batch_size=8192, verbose=1)
-    preds += merged.predict([seq2_train, seq1_train], batch_size=8192, verbose=1)
+    preds = merged.predict(([seq1_train] * n_doc2vec_models) + ([seq2_train] * n_doc2vec_models),
+                           batch_size=8192, verbose=1)
+    preds += merged.predict(([seq2_train] * n_doc2vec_models) + ([seq1_train] * n_doc2vec_models),
+                            batch_size=8192, verbose=1)
     preds /= 2
 
     preds_train = pd.DataFrame({'lstm_pred': preds.ravel()})
