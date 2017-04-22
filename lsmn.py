@@ -189,10 +189,6 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(dense_units, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
     merged.add(Dense(1, activation='sigmoid'))
 
     merged.compile(loss='binary_crossentropy',
