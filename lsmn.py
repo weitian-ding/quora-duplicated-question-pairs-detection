@@ -12,7 +12,7 @@ from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
 
 TRAIN_DATA = 'input/train.csv'
-TEST_DATA = 'input/train.csv'
+TEST_DATA = 'input/test.csv'
 
 TRAIN_PRED = 'data/lstm_train_pred.csv'
 TEST_PRED = 'data/lstm_test_pred.csv'
@@ -217,11 +217,11 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(dense_units, activation='relu'))
+    merged.add(Dense(200, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(dense_units, activation='relu'))
+    merged.add(Dense(125, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
