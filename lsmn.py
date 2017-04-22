@@ -24,9 +24,9 @@ W2V_DIM = 300
 MAX_SEQ_LEN = 40
 MAX_VOCAB_SIZE = 200000
 LSTM_UNITS = 225
-DENSE_UNITS = 125
+dense_units = 125
 LSTM_DROPOUT = 0.25
-DENSE_DROPOUT = 0.25
+dropout = 0.25
 EPOCH = 30
 
 POS_DISTRIB_IN_TEST = 0.1746
@@ -162,46 +162,40 @@ def main():
     # feat_model.add(BatchNormalization())
     '''
 
-    lsmn_model1 = Sequential()
-    lsmn_model1.add(Embedding(vocab_size,
+    model1 = Sequential()
+
+    model1.add(Embedding(vocab_size,
                          W2V_DIM,
                          weights=[w2v_weights],
                          input_length=MAX_SEQ_LEN,
                          trainable=False))
-    lsmn_model1.add(Conv1D(cnn_nb_filters,
-                     filter_length = filter_length,
+
+    model1.add(Conv1D(62,
+                     filter_length = 5,
                      padding='valid',
                      activation='relu',
                      strides=1))
-    lsmn_model1.add(MaxPooling1D(pool_size=pool_length))
-    lsmn_model1.add(LSTM(LSTM_UNITS,
-                    dropout=LSTM_DROPOUT,
-                    recurrent_dropout=LSTM_DROPOUT))
 
-    lsmn_model2 = Sequential()
-    lsmn_model2.add(Embedding(vocab_size,
-                         W2V_DIM,
-                         weights=[w2v_weights],
-                         input_length=MAX_SEQ_LEN,
-                         trainable=False))
-    lsmn_model2.add(Conv1D(cnn_nb_filters,
-                           filter_length=filter_length,
-                           padding='valid',
-                           activation='relu',
-                           strides=1))
-    lsmn_model2.add(MaxPooling1D(pool_size=pool_length))
-    lsmn_model2.add(LSTM(LSTM_UNITS,
-                    dropout=LSTM_DROPOUT,
-                    recurrent_dropout=LSTM_DROPOUT))
+    model1.add(MaxPooling1D(pool_size=4))
+
+    model1.add(Dropout(0.2))
+
+    model1.add(LSTM(225,
+                    dropout=0.25,
+                    recurrent_dropout=0.25))
 
     merged = Sequential()
 
-    merged.add(Merge([lsmn_model1, lsmn_model2], mode='concat'))
-    merged.add(Dropout(DENSE_DROPOUT))
+    merged.add(Merge([model1, model1], mode='concat'))
+    merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(DENSE_UNITS, activation='relu'))
-    merged.add(Dropout(DENSE_DROPOUT))
+    merged.add(Dense(dense_units, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(dense_units, activation='relu'))
+    merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
     merged.add(Dense(1, activation='sigmoid'))
