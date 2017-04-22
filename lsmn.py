@@ -86,6 +86,31 @@ def texts_to_padded_seq(texts, tk):
     return padded_seq
 
 
+def build_model(vocab_size, w2v_weights):
+    model1 = Sequential()
+
+    model1.add(Embedding(vocab_size,
+                         W2V_DIM,
+                         weights=[w2v_weights],
+                         input_length=MAX_SEQ_LEN,
+                         trainable=False))
+
+    model1.add(Conv1D(62,
+                      filter_length=5,
+                      padding='valid',
+                      activation='relu',
+                      strides=1))
+
+    model1.add(MaxPooling1D(pool_size=4))
+
+    model1.add(Dropout(0.2))
+
+    model1.add(LSTM(225,
+                    dropout=0.25,
+                    recurrent_dropout=0.25))
+    return model1
+
+
 def main():
 
     print('loading GoogleNews-Vectors-negative300.bin...')
@@ -162,31 +187,9 @@ def main():
     # feat_model.add(BatchNormalization())
     '''
 
-    model1 = Sequential()
-
-    model1.add(Embedding(vocab_size,
-                         W2V_DIM,
-                         weights=[w2v_weights],
-                         input_length=MAX_SEQ_LEN,
-                         trainable=False))
-
-    model1.add(Conv1D(62,
-                     filter_length = 5,
-                     padding='valid',
-                     activation='relu',
-                     strides=1))
-
-    model1.add(MaxPooling1D(pool_size=4))
-
-    model1.add(Dropout(0.2))
-
-    model1.add(LSTM(225,
-                    dropout=0.25,
-                    recurrent_dropout=0.25))
-
     merged = Sequential()
 
-    merged.add(Merge([model1, model1], mode='concat'))
+    merged.add(Merge([build_model(vocab_size, w2v_weights), build_model(vocab_size, w2v_weights)], mode='concat'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
