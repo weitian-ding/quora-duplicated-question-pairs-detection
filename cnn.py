@@ -41,7 +41,7 @@ filter_length = 5
 nb_filter = 64
 pool_length = 4
 
-n_doc2vec_models = 2
+n_doc2vec_models = 1
 
 def clean_txt(text):
     text = str(text).lower()
@@ -90,6 +90,7 @@ def texts_to_padded_seq(texts, tk):
 
 def build_doc2vec_model(vocab_size, w2v_weights):
 
+    '''
     model1 = Sequential()
 
     model1.add(Embedding(vocab_size,
@@ -101,6 +102,7 @@ def build_doc2vec_model(vocab_size, w2v_weights):
     model1.add(LSTM(300,
                     dropout=dropout,
                     recurrent_dropout=dropout))
+    '''
 
     model2 = Sequential()
 
@@ -146,7 +148,7 @@ def build_doc2vec_model(vocab_size, w2v_weights):
     model2.add(Dropout(dropout))
     model2.add(BatchNormalization())
 
-    return [model1, model2]
+    return [model2]
 
 
 def main():
@@ -215,18 +217,6 @@ def main():
     merged.add(BatchNormalization())
 
     merged.add(Dense(300, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(200, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(200, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(200, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
