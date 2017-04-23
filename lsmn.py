@@ -92,7 +92,7 @@ def build_doc2vec_model(vocab_size, w2v_weights):
     pool_length = 4
 
     # lstm layer
-    lstm_units = 225
+    lstm_units = 300
 
     model1 = Sequential()
 
@@ -201,6 +201,14 @@ def main():
     merged.add(BatchNormalization())
 
     merged.add(Dense(300, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(200, activation='relu'))
+    merged.add(Dropout(dropout))
+    merged.add(BatchNormalization())
+
+    merged.add(Dense(200, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
