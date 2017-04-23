@@ -123,16 +123,6 @@ def build_doc2vec_model(vocab_size, w2v_weights):
     model2.add(MaxPooling1D())
 
     model2.add(Convolution1D(nb_filter=64,
-                             filter_length=5,
-                             border_mode='valid',
-                             activation='relu',
-                             subsample_length=1))
-
-    model2.add(Dropout(dropout))
-
-    model2.add(MaxPooling1D())
-
-    model2.add(Convolution1D(nb_filter=64,
                              filter_length=2,
                              border_mode='valid',
                              activation='relu',
@@ -218,27 +208,7 @@ def main():
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
-    merged.add(Dense(600, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(600, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(600, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(300, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(300, activation='relu'))
-    merged.add(Dropout(dropout))
-    merged.add(BatchNormalization())
-
-    merged.add(Dense(100, activation='relu'))
+    merged.add(Dense(125, activation='relu'))
     merged.add(Dropout(dropout))
     merged.add(BatchNormalization())
 
