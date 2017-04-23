@@ -118,13 +118,7 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              activation='relu',
                              subsample_length=1))
 
-    model2.add(MaxPooling1D())
-
-    model2.add(Convolution1D(nb_filter=64,
-                             filter_length=5,
-                             border_mode='valid',
-                             activation='relu',
-                             subsample_length=1))
+    model2.add(Dropout(dropout))
 
     model2.add(MaxPooling1D())
 
@@ -133,6 +127,18 @@ def build_doc2vec_model(vocab_size, w2v_weights):
                              border_mode='valid',
                              activation='relu',
                              subsample_length=1))
+
+    model2.add(Dropout(dropout))
+
+    model2.add(MaxPooling1D())
+
+    model2.add(Convolution1D(nb_filter=64,
+                             filter_length=5,
+                             border_mode='valid',
+                             activation='relu',
+                             subsample_length=1))
+
+    model2.add(Dropout(dropout))
 
     model2.add(MaxPooling1D())
 
