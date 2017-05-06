@@ -16,7 +16,7 @@ MODEL_TFIDF_FILE = 'models/bow_tfidf.pkl'
 MODEL_BIN_FILE = 'models/bow_bin.pkl'
 
 POS_PROP = 0.165
-SUBMISSION_FILE = 'data/test_pred.csv'
+SUBMISSION_FILE = 'output/test_pred.csv'
 
 def tokenize(txt):
     return str(txt).lower().split()
@@ -42,7 +42,7 @@ def main():
 
     vectorizer = build_vectorizer(binary=False)
 
-    print('loading data...')
+    print('loading output...')
     train_data = pd.read_csv(TRAIN_FILE)
     test_data = pd.read_csv(TEST_FILE)
     #train_data['qpair'] = train_data.apply(lambda r: '{0} {1}'.format(str(r.question1), str(r.question2)), axis=1)

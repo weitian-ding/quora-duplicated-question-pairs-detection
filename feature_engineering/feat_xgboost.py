@@ -8,8 +8,8 @@ TRAIN_DATA = 'input/train.csv'
 TRAIN_FEATURES = "features/train.csv"
 TEST_FEATURES = "features/test.csv"
 
-TRAIN_PREDICTION = 'data/bst_train_pred.csv'
-SUBMISSION_FILE = 'data/bst_test_pred.csv'
+TRAIN_PREDICTION = 'output/bst_train_pred.csv'
+SUBMISSION_FILE = 'output/bst_test_pred.csv'
 
 POS_PROP = 0.1746
 
@@ -91,16 +91,16 @@ def main():
     joblib.dump(bst, 'models/bst-{0}.model'.format(timestamp))
 
     # making predictions
-    print('predicting training data...')
+    print('predicting training output...')
     d_train = xgb.DMatrix(train_features.drop(['is_duplicate'], axis=1))
     predict(d_train, bst, TRAIN_PREDICTION)
 
-    print('loading testing data...')
+    print('loading testing output...')
     test_features = pd.read_csv(TEST_FEATURES)
     test_features = test_features.fillna(.0)
     d_test = xgb.DMatrix(test_features)
 
-    print('predicting testing data...')
+    print('predicting testing output...')
     predict(d_test, bst, SUBMISSION_FILE)
 
 if __name__ == '__main__':

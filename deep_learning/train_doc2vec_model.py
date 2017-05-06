@@ -1,9 +1,8 @@
-import sys
 from random import shuffle
 
 from gensim.models.doc2vec import Doc2Vec
 
-from quora_question_pairs_helpers import TaggedQuestions
+from utils.quora_question_pairs_helpers import TaggedQuestions
 
 VEC_DIM = 400
 
@@ -25,7 +24,7 @@ def main():
     #test_file = sys.argv[2]
     n_workers = NUM_CORES
 
-    print('reading training data...')
+    print('reading training output...')
     questions = [question for question in TaggedQuestions(train_file, stem=False)]
 
     # for review in reviews:

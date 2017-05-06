@@ -1,7 +1,8 @@
 import unittest
 
-from clean_data import clean_txt
 from feature_extraction_bag_of_words import sym_kl_div
+
+from utils.clean_data import clean_txt
 
 
 class Test(unittest.TestCase):

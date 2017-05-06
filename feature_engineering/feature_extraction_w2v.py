@@ -67,13 +67,13 @@ def extract_features(df):
 
 def main():
     if TRAIN_DATA != '':
-        print('embedding training data...')
+        print('embedding training output...')
         train = pd.read_csv(TRAIN_DATA)
         train_features = extract_features(train)
         train_features.to_csv(TRAIN_FEATURE, index=False)
 
     if TEST_DATA != '':
-        print('embedding testing data...')
+        print('embedding testing output...')
         test = pd.read_csv(TEST_DATA)
         test_features = extract_features(test)
         test_features.to_csv(TEST_FEATURE, index=False)

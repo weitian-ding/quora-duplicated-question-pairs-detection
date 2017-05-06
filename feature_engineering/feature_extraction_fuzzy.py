@@ -21,11 +21,11 @@ def extract_features(df):
 
 def main():
     if TRAIN_FILE != "":
-        print('loading training data...')
+        print('loading training output...')
         dataframe = pd.read_csv(TRAIN_FILE)
-        print('{0} training data loaded'.format(len(dataframe)))
+        print('{0} training output loaded'.format(len(dataframe)))
 
-        print('embedding training data...')
+        print('embedding training output...')
         features = extract_features(dataframe)
 
         print('fuzz_qratio AUC:', roc_auc_score(dataframe['is_duplicate'], features['fuzz_qratio']))
@@ -37,11 +37,11 @@ def main():
         features.to_csv(TRAIN_OUTPUT_FILE, index=False)
 
     if TEST_FILE != "":
-        print('loading testing data...')
+        print('loading testing output...')
         dataframe = pd.read_csv(TEST_FILE)
-        print('{0} testing data loaded'.format(len(dataframe)))
+        print('{0} testing output loaded'.format(len(dataframe)))
 
-        print('embedding testing data...')
+        print('embedding testing output...')
         features = extract_features(dataframe)
 
         features.to_csv(TEST_OUTPUT_FILE, index=False)

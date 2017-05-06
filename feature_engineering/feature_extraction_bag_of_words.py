@@ -12,7 +12,7 @@ TFIDF_MODEL_FILE = 'models/bow_tfidf.pkl'
 BIN_MODEL_FILE = 'models/bow_bin.pkl'
 
 
-TRAIN_FILE = 'input/train.csv' #"data/train_balanced.csv"
+TRAIN_FILE = 'input/train.csv' #"output/train_balanced.csv"
 TEST_FILE = 'input/test.csv' #"../test.csv"
 
 TRAIN_OUTPUT_FILE = "features/bow_train.csv"
@@ -89,7 +89,7 @@ def main():
     # assert tokenize('') == [] # check whether tokenize is imported
 
     if TRAIN_FILE != "":
-        print('embedding training data...')
+        print('embedding training output...')
 
         df = pd.read_csv(TRAIN_FILE)
         features = extract_features(df, tfidf_model, bin_model)
@@ -105,7 +105,7 @@ def main():
         print('bow_bin_hamming AUC:', roc_auc_score(df['is_duplicate'], 1 - features['bow_bin_hamming']))
 
     if TEST_FILE != "":
-        print('embedding testing data...')
+        print('embedding testing output...')
         df = pd.read_csv(TEST_FILE)
         features = extract_features(df, tfidf_model, bin_model)
         features.to_csv(TEST_OUTPUT_FILE, index=False)

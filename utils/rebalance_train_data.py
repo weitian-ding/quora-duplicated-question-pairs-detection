@@ -1,10 +1,9 @@
-
 import csv
 from random import shuffle
 
 import numpy as np
-from sklearn.model_selection import train_test_split
-from quora_question_pairs_helpers import QuoraQuestionPairs
+
+from utils.quora_question_pairs_helpers import QuoraQuestionPairs
 
 TRAIN_DATA = 'train.csv'
 

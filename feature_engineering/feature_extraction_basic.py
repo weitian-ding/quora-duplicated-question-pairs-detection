@@ -6,10 +6,10 @@ from nltk import pos_tag, PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.metrics import roc_auc_score
 
-from clean_data import clean_txt
+from utils.clean_data import clean_txt
 
 TRAIN_FILE = 'input/train.csv'
-TEST_FILE = 'input/test.csv' #''data/test_cleaned.csv'
+TEST_FILE = 'input/test.csv' #''output/test_cleaned.csv'
 
 TRAIN_OUTPUT_FILE = "features/basic_train.csv"
 TEST_OUTPUT_FILE = "features/basic_test.csv"
@@ -85,10 +85,10 @@ def extract_features(df):
 if __name__ == "__main__":
 
     if TRAIN_FILE != "":
-        print('loading training data...')
+        print('loading training output...')
         df = pd.read_csv(TRAIN_FILE)
 
-        print('embedding training data...')
+        print('embedding training output...')
         features = extract_features(df)
 
         print('word_match accuracy:', roc_auc_score(df['is_duplicate'], features['word_match']))
@@ -99,10 +99,10 @@ if __name__ == "__main__":
         features.to_csv(TRAIN_OUTPUT_FILE, index=False)
 
     if TEST_FILE != "":
-        print('loading testing data...')
+        print('loading testing output...')
         df = pd.read_csv(TEST_FILE)
 
-        print('embedding testing data...')
+        print('embedding testing output...')
         features = extract_features(df)
 
         features.to_csv(TEST_OUTPUT_FILE, index=False)

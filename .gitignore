@@ -21,3 +21,5 @@ log_reg_classify_tfidf.py
 *.txt
 
 models/
+
+.ipynb_checkpoints/

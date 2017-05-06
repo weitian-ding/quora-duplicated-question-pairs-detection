@@ -15,9 +15,9 @@ from keras.preprocessing.text import Tokenizer
 TRAIN_DATA = 'input/train.csv'
 TEST_DATA = 'input/test.csv'
 
-TRAIN_PRED = 'data/lstm_train_pred.csv'
-TEST_PRED = 'data/lstm_test_pred.csv'
-SUBMISSION_FILE = 'data/lstm_test_pred_re_weighted.csv'
+TRAIN_PRED = 'output/lstm_train_pred.csv'
+TEST_PRED = 'output/lstm_test_pred.csv'
+SUBMISSION_FILE = 'output/lstm_test_pred_re_weighted.csv'
 
 GOOGLE_W2V_MODEL = 'models/GoogleNews-Vectors-negative300.bin'
 GLOVE_W2V_MODEL = 'models/glove.42B.300d.txt'
@@ -126,21 +126,21 @@ def main():
         glove_w2v_model[word] = coefs
     f.close()
 
-    # load data
-    print('loading training data...')
+    # load output
+    print('loading training output...')
     train_data = pd.read_csv(TRAIN_DATA).fillna('na')
     train_data.question1 = train_data.question1.map(clean_txt)
     train_data.question2 = train_data.question2.map(clean_txt)
 
     pos_distrib_in_train = train_data.is_duplicate.mean()
-    print('{0}% positives in training data'.format(pos_distrib_in_train * 100))
+    print('{0}% positives in training output'.format(pos_distrib_in_train * 100))
 
     def re_weight(score):
         pa = POS_DISTRIB_IN_TEST / pos_distrib_in_train
         pb = (1 - POS_DISTRIB_IN_TEST) / (1 - pos_distrib_in_train)
         return pa * score / (pa * score + pb * (1 - score))
 
-    print('loading testing data...')
+    print('loading testing output...')
     test_data = pd.read_csv(TEST_DATA).fillna('na')
     test_data.question1 = test_data.question1.map(clean_txt)
     test_data.question2 = test_data.question2.map(clean_txt)
