@@ -1,6 +1,6 @@
 # Classify Duplicated Quora Question Pairs
 
-[The Kaggle competition](https://www.kaggle.com/c/quora-question-pairs).
+[The Kaggle competition](https://www.kaggle.com/c/quora-question-pairs)
 
 * [deep_learning](deep_learning): Deep neural networks which extract feature vectors from Quora questions.
   * [cnn.py](deep_learning/cnn.py) is a convolutional neural network. 
